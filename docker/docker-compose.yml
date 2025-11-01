@@ -1,0 +1,15 @@
+services:
+  mediadb-mysql:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    container_name: mediadb-mysql
+    ports:
+      - "3306:3306"
+    networks:
+      mediadb:
+        aliases:
+          - mediadb-mysql
+networks:
+  mediadb:
+    name: mediadb
