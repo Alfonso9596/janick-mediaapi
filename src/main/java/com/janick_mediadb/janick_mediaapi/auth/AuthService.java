@@ -1,6 +1,5 @@
 package com.janick_mediadb.janick_mediaapi.auth;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 
 public interface AuthService {
@@ -9,7 +8,7 @@ public interface AuthService {
 
     String register(RegisterLoginModel registerModel);
 
-    ResponseEntity<String> logout(Object principal);
+    ResponseEntity<String> logout(UserDetailsImpl principal);
 
-    ResponseEntity<String> refreshToken(HttpServletRequest request);
+    ResponseEntity<?> refreshToken(TokenRefreshRequest request);
 }

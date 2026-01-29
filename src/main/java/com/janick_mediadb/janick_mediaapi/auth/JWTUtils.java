@@ -11,7 +11,6 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
@@ -38,17 +37,18 @@ public class JWTUtils {
     private String jwtRefreshCookie;
 
     public ResponseCookie generateJwtCookie(UserDetailsImpl userPrincipal) {
-        String jwt = generateTokenFromUsername(userPrincipal.getUsername());
+        String jwt = generateTokenFromUsername(userPrincipal.getUsername(), jwtExpirationMs);
         return generateCookie(jwtCookie, jwt, "/api", jwtExpirationMs / 1000);
     }
 
     public ResponseCookie generateJwtCookie(UsersEntity user) {
-        String jwt = generateTokenFromUsername(user.getUsername());
+        String jwt = generateTokenFromUsername(user.getUsername(), jwtExpirationMs);
         return generateCookie(jwtCookie, jwt, "/api", jwtExpirationMs / 1000);
     }
 
-    public ResponseCookie generateRefreshJwtCookie(String refreshToken) {
-        return generateCookie(jwtRefreshCookie, refreshToken, "/api/auth/refreshtoken", jwtRefreshExpirationMs/ 1000);
+    public ResponseCookie generateRefreshJwtCookie(UserDetailsImpl userPrincipal) {
+        String jwt = generateTokenFromUsername(userPrincipal.getUsername(), jwtRefreshExpirationMs);
+        return generateCookie(jwtRefreshCookie, jwt, "/api/auth/refreshtoken", jwtRefreshExpirationMs/ 1000);
     }
 
     public String getJwtFromCookies(HttpServletRequest request) {
@@ -91,11 +91,11 @@ public class JWTUtils {
         }
     }
 
-    public String generateTokenFromUsername(String username) {
+    public String generateTokenFromUsername(String username, int expirationMs) {
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())
-                .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .expiration(new Date((new Date()).getTime() + expirationMs))
                 .signWith(key())
                 .compact();
     }

@@ -1,9 +1,7 @@
 package com.janick_mediadb.janick_mediaapi.controller;
 
-import com.janick_mediadb.janick_mediaapi.auth.AuthService;
-import com.janick_mediadb.janick_mediaapi.auth.JWTAuthResponse;
-import com.janick_mediadb.janick_mediaapi.auth.RegisterLoginModel;
-import jakarta.servlet.http.HttpServletRequest;
+import com.janick_mediadb.janick_mediaapi.auth.*;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +9,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/api/auth")
 public class AuthController {
 
@@ -31,12 +28,12 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserDetailsImpl principal = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return authService.logout(principal);
     }
 
     @PostMapping("/refreshtoken")
-    public ResponseEntity<String> refreshToken(HttpServletRequest request) {
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
         return authService.refreshToken(request);
     }
 }

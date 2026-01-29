@@ -29,12 +29,12 @@ public class RefreshTokenService {
         return refreshTokenRepository.findByToken(token);
     }
 
-    public RefreshTokenEntity createRefreshToken(int userId) {
+    public RefreshTokenEntity createRefreshToken(int userId, String token) {
         RefreshTokenEntity refreshToken = new RefreshTokenEntity();
 
         refreshToken.setUser(userRepository.findById(userId).get());
         refreshToken.setExpiryDate(Instant.now().plusMillis(jwtRefreshExpirationMs));
-        refreshToken.setToken(UUID.randomUUID().toString());
+        refreshToken.setToken(token);
 
         refreshToken = refreshTokenRepository.save(refreshToken);
         return refreshToken;

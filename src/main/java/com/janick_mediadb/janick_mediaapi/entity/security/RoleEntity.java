@@ -16,5 +16,7 @@ public class RoleEntity extends AbstractEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String name;
+
+    @Enumerated(EnumType.STRING)
+    private ERole name;
 }

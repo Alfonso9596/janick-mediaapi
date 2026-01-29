@@ -1,5 +1,6 @@
 package com.janick_mediadb.janick_mediaapi.auth;
 
+import com.janick_mediadb.janick_mediaapi.entity.security.ERole;
 import com.janick_mediadb.janick_mediaapi.entity.security.RefreshTokenEntity;
 import com.janick_mediadb.janick_mediaapi.entity.security.RoleEntity;
 import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
@@ -7,7 +8,6 @@ import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
 import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
 import com.janick_mediadb.janick_mediaapi.repository.RoleRepository;
 import com.janick_mediadb.janick_mediaapi.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -61,14 +60,14 @@ public class AuthServiceImpl implements AuthService {
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
-        RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+        ResponseCookie jwtRefreshCookie = jwtUtils.generateRefreshJwtCookie(userDetails);
 
-        ResponseCookie jwtRefreshCookie = jwtUtils.generateRefreshJwtCookie(refreshToken.getToken());
+        refreshTokenService.createRefreshToken(userDetails.getId(), jwtRefreshCookie.getValue());
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
                 .body(new JWTAuthResponse(
+                        jwtCookie.getValue(),
+                        jwtRefreshCookie.getValue(),
                         userDetails.getId(),
                         userDetails.getUsername(),
                         roles
@@ -86,7 +85,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(registerModel.getPassword()));
 
         Set<RoleEntity> roles = new HashSet<>();
-        RoleEntity userRole = roleRepository.findByName("USER").get();
+        RoleEntity userRole = roleRepository.findByName(ERole.USER).get();
         roles.add(userRole);
         user.setRoles(roles);
 
@@ -96,9 +95,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<String> logout(Object principal) {
-        if (!Objects.equals(principal.toString(), "anonymousUser")) {
-            int userId = ((UserDetailsImpl) principal).getId();
+    public ResponseEntity<String> logout(UserDetailsImpl principal) {
+        if (principal.toString().equalsIgnoreCase("anonymousUser")) {
+            int userId = principal.getId();
             refreshTokenService.deleteByUserId(userId);
         }
 
@@ -112,8 +111,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<String> refreshToken(HttpServletRequest request) {
-        String refreshToken = jwtUtils.getJwtRefreshFromCookies(request);
+    public ResponseEntity<?> refreshToken(TokenRefreshRequest request) {
+        String refreshToken = request.getRefreshToken();
 
         if ((refreshToken != null) && (!refreshToken.isEmpty())) {
             return refreshTokenService.findByToken(refreshToken)
@@ -122,9 +121,13 @@ public class AuthServiceImpl implements AuthService {
                     .map(user -> {
                         ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(user);
 
-                        return ResponseEntity.ok()
-                                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                                .body("Token is refresh successfully");
+                        return ResponseEntity.ok().body(new JWTAuthResponse(
+                                jwtCookie.getValue(),
+                                refreshToken,
+                                user.getId(),
+                                user.getUsername(),
+                                user.getRoles().stream().map(r -> r.getName().name()).toList()
+                        ));
                     })
                     .orElseThrow(() -> new NotFoundException("Refresh token is not in database"));
         }

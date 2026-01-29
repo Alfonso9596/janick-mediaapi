@@ -7,8 +7,6 @@ import com.janick_mediadb.janick_mediaapi.model.response.MovieResponse;
 import com.janick_mediadb.janick_mediaapi.model.response.MovieSearchCriteria;
 import com.janick_mediadb.janick_mediaapi.service.MovieService;
 import com.janick_mediadb.janick_mediaapi.utils.AppConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/api/movies")
 public class MovieController {
 
