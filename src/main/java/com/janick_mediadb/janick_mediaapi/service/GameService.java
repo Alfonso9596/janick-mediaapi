@@ -33,6 +33,7 @@ public class GameService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GameService.class);
     private static final String GAME_FILES_PATH = "games/";
+    public static final String GAME_WITH_ID_DOES_NOT_EXIST = "Game with id {0} does not exist";
 
     @Autowired
     private GameRepository gameRepository;
@@ -89,7 +90,7 @@ public class GameService {
             gameRatingXrefService.collectRatings(model.getId(), model);
             return model;
         } else {
-            String message = MessageFormat.format("Game with id {0} does not exist", id);
+            String message = MessageFormat.format(GAME_WITH_ID_DOES_NOT_EXIST, id);
             LOGGER.error(message);
             throw new NotFoundException(message);
         }
@@ -144,7 +145,7 @@ public class GameService {
     public String deleteGame(int id) {
         Optional<GameEntity> opGame = gameRepository.findById(id);
         if (opGame.isEmpty()) {
-            String message = MessageFormat.format("Game with id {0} does not exist", id);
+            String message = MessageFormat.format(GAME_WITH_ID_DOES_NOT_EXIST, id);
             LOGGER.error(message);
             throw new NotFoundException(message);
         }
@@ -161,7 +162,7 @@ public class GameService {
     public String rateGame(int id, int rating) {
         Optional<GameEntity> opGame = gameRepository.findById(id);
         if (opGame.isEmpty()) {
-            String message = MessageFormat.format("Game with id {0} does not exist", id);
+            String message = MessageFormat.format(GAME_WITH_ID_DOES_NOT_EXIST, id);
             LOGGER.error(message);
             throw new NotFoundException(message);
         }

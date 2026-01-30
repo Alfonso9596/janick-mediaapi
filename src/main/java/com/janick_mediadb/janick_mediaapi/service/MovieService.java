@@ -33,6 +33,7 @@ public class MovieService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MovieService.class);
     private static final String MOVIE_FILES_PATH = "movies/";
+    public static final String MOVIE_WITH_ID_DOES_NOT_EXIST = "Movie with id {0} does not exist";
 
     @Autowired
     private MovieRepository movieRepository;
@@ -89,7 +90,7 @@ public class MovieService {
             movieRatingXrefService.collectRatings(model.getId(), model);
             return model;
         } else {
-            String message = MessageFormat.format("Movie with id {0} does not exist", id);
+            String message = MessageFormat.format(MOVIE_WITH_ID_DOES_NOT_EXIST, id);
             LOGGER.error(message);
             throw new NotFoundException(message);
         }
@@ -144,7 +145,7 @@ public class MovieService {
     public String deleteMovie(int id) {
         Optional<MovieEntity> opMovie = movieRepository.findById(id);
         if (opMovie.isEmpty()) {
-            String message = MessageFormat.format("Movie with id {0} does not exist", id);
+            String message = MessageFormat.format(MOVIE_WITH_ID_DOES_NOT_EXIST, id);
             LOGGER.error(message);
             throw new NotFoundException(message);
         }
@@ -161,7 +162,7 @@ public class MovieService {
     public String rateMovie(int id, int rating) {
         Optional<MovieEntity> opMovie = movieRepository.findById(id);
         if (opMovie.isEmpty()) {
-            String message = MessageFormat.format("Movie with id {0} does not exist", id);
+            String message = MessageFormat.format(MOVIE_WITH_ID_DOES_NOT_EXIST, id);
             LOGGER.error(message);
             throw new NotFoundException(message);
         }

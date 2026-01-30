@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class FileDownloadException extends Exception {
 
-    private String message;
+    private final String message;
 
     public FileDownloadException(String message) {
         this.message = message;

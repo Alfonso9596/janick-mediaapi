@@ -17,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 public class FileController {
@@ -53,7 +52,7 @@ public class FileController {
             String url = MvcUriComponentsBuilder
                     .fromMethodName(FileController.class, "getFile", relativePath).build().toString();
             return new FileInfoModel(filename, url.replace("\\", "/"));
-        }).collect(Collectors.toList());
+        }).toList();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -61,10 +60,9 @@ public class FileController {
     }
 
     @GetMapping(value = "/api/file", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ResponseBody
     public ResponseEntity<Resource> getFile(
             @RequestParam String filename) throws FileDownloadException {
-        LOGGER.info("FILENAME: " + filename);
+        LOGGER.info("FILENAME: {}", filename);
         Resource file = fileStorageService.load(filename);
         return ResponseEntity
                 .ok()

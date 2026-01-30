@@ -11,6 +11,10 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class GameSpecification {
 
+    private GameSpecification() {
+        throw new IllegalStateException("Non-constructor class");
+    }
+
     public static Specification<GameEntity> likeName(String name) {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.like(root.get("name"), "%" + name + "%");

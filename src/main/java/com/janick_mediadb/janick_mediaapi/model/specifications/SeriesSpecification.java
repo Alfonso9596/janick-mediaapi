@@ -9,6 +9,10 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class SeriesSpecification {
 
+    private SeriesSpecification() {
+        throw new IllegalStateException("Non-constructor class");
+    }
+
     public static Specification<SeriesEntity> likeName(String name) {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.like(root.get("name"), "%" + name + "%");

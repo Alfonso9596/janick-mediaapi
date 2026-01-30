@@ -76,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String register(RegisterLoginModel registerModel) {
-        if (userRepository.existsByUsername(registerModel.getUsername())) {
+        if (Boolean.TRUE.equals(userRepository.existsByUsername(registerModel.getUsername()))) {
             throw new BadRequestException("Username already exists!");
         }
 

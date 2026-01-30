@@ -14,7 +14,7 @@ public abstract class AbstractEntity {
         try {
             result = mapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {
-            result = super.toString();;
+            result = super.toString();
         }
         return result;
     }

@@ -33,6 +33,7 @@ public class SeriesService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeriesService.class);
     private static final String SERIES_FILES_PATH = "series/";
+    public static final String SERIES_WITH_ID_DOES_NOT_EXIST = "Series with id {0} does not exist";
 
     @Autowired
     private SeriesRepository seriesRepository;
@@ -89,7 +90,7 @@ public class SeriesService {
             seriesRatingXrefService.collectRatings(model.getId(), model);
             return model;
         } else {
-            String message = MessageFormat.format("Series with id {0} does not exist", id);
+            String message = MessageFormat.format(SERIES_WITH_ID_DOES_NOT_EXIST, id);
             LOGGER.error(message);
             throw new NotFoundException(message);
         }
@@ -144,7 +145,7 @@ public class SeriesService {
     public String deleteSeries(int id) {
         Optional<SeriesEntity> opSeries = seriesRepository.findById(id);
         if (opSeries.isEmpty()) {
-            String message = MessageFormat.format("Series with id {0} does not exist", id);
+            String message = MessageFormat.format(SERIES_WITH_ID_DOES_NOT_EXIST, id);
             LOGGER.error(message);
             throw new NotFoundException(message);
         }
@@ -161,7 +162,7 @@ public class SeriesService {
     public String rateSeries(int id, int rating) {
         Optional<SeriesEntity> opSeries = seriesRepository.findById(id);
         if (opSeries.isEmpty()) {
-            String message = MessageFormat.format("Series with id {0} does not exist", id);
+            String message = MessageFormat.format(SERIES_WITH_ID_DOES_NOT_EXIST, id);
             LOGGER.error(message);
             throw new NotFoundException(message);
         }
