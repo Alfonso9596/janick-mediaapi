@@ -27,7 +27,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     public static final String POSTER_FILE_TYPE = ".jpg";
 
     private final Path root = Paths.get("uploads");
-    private final Path movies = Paths.get("uploads/movies");
+    public static final Path movies = Paths.get("uploads/movies");
     private final Path series = Paths.get("uploads/series");
     private final Path games = Paths.get("uploads/games");
 
@@ -72,7 +72,6 @@ public class FileStorageServiceImpl implements FileStorageService {
     public Resource load(String filename) throws FileDownloadException {
         try {
             Path file = root.resolve(filename);
-            LOGGER.info("PATH: {}", file.toUri());
             Resource resource = new UrlResource(file.toUri());
 
             if (resource.exists() || resource.isReadable()) {

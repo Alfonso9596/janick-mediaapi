@@ -1,11 +1,15 @@
 package com.janick_mediadb.janick_mediaapi.service;
 
+import com.janick_mediadb.janick_mediaapi.controller.FileController;
 import com.janick_mediadb.janick_mediaapi.entity.MovieGenreEntity;
 import com.janick_mediadb.janick_mediaapi.entity.MovieEntity;
+import com.janick_mediadb.janick_mediaapi.enums.DownloadFileType;
 import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
+import com.janick_mediadb.janick_mediaapi.exception.InternalServerException;
 import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
 import com.janick_mediadb.janick_mediaapi.input.MovieGenreInput;
 import com.janick_mediadb.janick_mediaapi.input.MovieInput;
+import com.janick_mediadb.janick_mediaapi.model.FileInfoModel;
 import com.janick_mediadb.janick_mediaapi.model.MovieModel;
 import com.janick_mediadb.janick_mediaapi.model.response.MovieResponse;
 import com.janick_mediadb.janick_mediaapi.model.response.MovieSearchCriteria;
@@ -20,8 +24,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -171,6 +182,64 @@ public class MovieService {
         return MessageFormat.format("{0} has been rated with {1}", movieEntity.getName(), rating);
     }
 
+    public ResponseEntity<List<FileInfoModel>> getMovieFiles(int id) {
+        Optional<MovieEntity> opMovie = movieRepository.findById(id);
+        if (opMovie.isEmpty()) {
+            String message = MessageFormat.format(MOVIE_WITH_ID_DOES_NOT_EXIST, id);
+            LOGGER.error(message);
+            throw new NotFoundException(message);
+        }
+        MovieEntity movieEntity = opMovie.get();
+        String fileStorageName = NamingUtility.renameTitleForFilepath(movieEntity.getName()) + "_" + movieEntity.getYear();
+        Path filePath = FileStorageServiceImpl.movies.resolve(fileStorageName).resolve("files");
+
+        try {
+            if (!Files.exists(filePath)) {
+                Files.createDirectories(filePath);
+            }
+        } catch (IOException e) {
+            throw new InternalServerException("Could not create directory " + filePath, e);
+        }
+        List<FileInfoModel> fileInfoModels = getDirList(filePath.toFile());
+
+        return ResponseEntity.status(HttpStatus.OK).body(fileInfoModels);
+    }
+
+    private FileInfoModel getNode(File node) {
+        FileInfoModel fileInfoModel = new FileInfoModel();
+        fileInfoModel.setName(node.getName());
+        if (node.isDirectory()) {
+            fileInfoModel.setFileType(DownloadFileType.FOLDER);
+
+            List<FileInfoModel> childrenInfoModels = getDirList(node);
+            fileInfoModel.setChildren(childrenInfoModels);
+        } else {
+            String relativePath = node.toPath().toString().replace("uploads\\", "");
+            String url = MvcUriComponentsBuilder.fromMethodName(FileController.class, "getFile", relativePath).build().toString();
+
+            fileInfoModel.setUrl(url.replace("\\", "/"));
+            fileInfoModel.setSize(node.length());
+
+            String fileExtension = getFileExtension(node.getName());
+            switch (fileExtension) {
+                case "zip", "rar", "7z", "tar":
+                    fileInfoModel.setFileType(DownloadFileType.ZIP);
+                    break;
+                default:
+                    fileInfoModel.setFileType(DownloadFileType.VIDEO);
+            }
+        }
+        return fileInfoModel;
+    }
+
+    private List<FileInfoModel> getDirList(File node) {
+        List<FileInfoModel> fileInfoModels = new ArrayList<>();
+        for (File file : node.listFiles()) {
+            fileInfoModels.add(getNode(file));
+        }
+        return fileInfoModels;
+    }
+
     private List<MovieEntity> getAllMovieEntities() {
         return new ArrayList<>(movieRepository.findAll());
     }
@@ -191,5 +260,16 @@ public class MovieService {
         }
 
         return spec;
+    }
+
+    private String getFileExtension(String filename) {
+        if (filename == null) {
+            return null;
+        }
+        int dotIndex = filename.lastIndexOf('.');
+        if (dotIndex >= 0) {
+            return filename.substring(dotIndex + 1);
+        }
+        return null;
     }
 }

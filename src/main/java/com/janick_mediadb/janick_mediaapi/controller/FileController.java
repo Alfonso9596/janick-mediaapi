@@ -1,5 +1,6 @@
 package com.janick_mediadb.janick_mediaapi.controller;
 
+import com.janick_mediadb.janick_mediaapi.enums.DownloadFileType;
 import com.janick_mediadb.janick_mediaapi.enums.UploadMediaType;
 import com.janick_mediadb.janick_mediaapi.exception.FileDownloadException;
 import com.janick_mediadb.janick_mediaapi.model.FileInfoModel;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -44,14 +46,16 @@ public class FileController {
         }
     }
 
+    // TODO: Probably to be deprecated
     @GetMapping(value = "/api/files", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<FileInfoModel>> getListFiles() {
         List<FileInfoModel> fileInfoModels = fileStorageService.loadAll().map(path -> {
             String filename = path.getFileName().toString();
+            long fileSize = path.toFile().length();
             String relativePath = path.toString().replace("uploads\\", "");
             String url = MvcUriComponentsBuilder
                     .fromMethodName(FileController.class, "getFile", relativePath).build().toString();
-            return new FileInfoModel(filename, url.replace("\\", "/"));
+            return new FileInfoModel(filename, url.replace("\\", "/"), fileSize, DownloadFileType.ZIP, new ArrayList<>());
         }).toList();
 
         return ResponseEntity
@@ -62,7 +66,7 @@ public class FileController {
     @GetMapping(value = "/api/file", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> getFile(
             @RequestParam String filename) throws FileDownloadException {
-        LOGGER.info("FILENAME: {}", filename);
+
         Resource file = fileStorageService.load(filename);
         return ResponseEntity
                 .ok()

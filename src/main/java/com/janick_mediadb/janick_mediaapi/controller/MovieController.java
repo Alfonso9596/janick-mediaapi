@@ -2,6 +2,7 @@ package com.janick_mediadb.janick_mediaapi.controller;
 
 import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
 import com.janick_mediadb.janick_mediaapi.input.MovieInput;
+import com.janick_mediadb.janick_mediaapi.model.FileInfoModel;
 import com.janick_mediadb.janick_mediaapi.model.MovieModel;
 import com.janick_mediadb.janick_mediaapi.model.response.MovieResponse;
 import com.janick_mediadb.janick_mediaapi.model.response.MovieSearchCriteria;
@@ -13,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/movies")
@@ -65,5 +68,10 @@ public class MovieController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(movieService.rateMovie(id, rating));
+    }
+
+    @GetMapping("/{id}/files")
+    public ResponseEntity<List<FileInfoModel>> getMovieFiles(@PathVariable("id") int id) {
+        return movieService.getMovieFiles(id);
     }
 }
