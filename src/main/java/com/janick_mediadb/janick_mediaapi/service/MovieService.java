@@ -1,8 +1,11 @@
 package com.janick_mediadb.janick_mediaapi.service;
 
+import com.janick_mediadb.janick_mediaapi.auth.UserDetailsImpl;
 import com.janick_mediadb.janick_mediaapi.controller.FileController;
 import com.janick_mediadb.janick_mediaapi.entity.MovieGenreEntity;
 import com.janick_mediadb.janick_mediaapi.entity.MovieEntity;
+import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
+import com.janick_mediadb.janick_mediaapi.entity.xref.MovieRatingXrefEntity;
 import com.janick_mediadb.janick_mediaapi.enums.DownloadFileType;
 import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
 import com.janick_mediadb.janick_mediaapi.exception.InternalServerException;
@@ -11,6 +14,7 @@ import com.janick_mediadb.janick_mediaapi.input.MovieGenreInput;
 import com.janick_mediadb.janick_mediaapi.input.MovieInput;
 import com.janick_mediadb.janick_mediaapi.model.FileInfoModel;
 import com.janick_mediadb.janick_mediaapi.model.MovieModel;
+import com.janick_mediadb.janick_mediaapi.model.RatingUpdateModel;
 import com.janick_mediadb.janick_mediaapi.model.response.MovieResponse;
 import com.janick_mediadb.janick_mediaapi.model.response.MovieSearchCriteria;
 import com.janick_mediadb.janick_mediaapi.model.specifications.MovieSpecification;
@@ -26,6 +30,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
@@ -57,6 +62,9 @@ public class MovieService {
 
     @Autowired
     private MovieGenreService genreService;
+
+    @Autowired
+    private UserService userService;
 
     public MovieResponse getAllMovies(int page, int pageSize, String sortBy, String sortDir, MovieSearchCriteria criteria) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
@@ -170,16 +178,27 @@ public class MovieService {
         return MessageFormat.format("The movie {0} has been deleted", movieEntity.getName());
     }
 
-    public String rateMovie(int id, int rating) {
-        Optional<MovieEntity> opMovie = movieRepository.findById(id);
+    public String rateMovie(RatingUpdateModel ratingUpdateModel) {
+        Optional<MovieEntity> opMovie = movieRepository.findById(ratingUpdateModel.getId());
         if (opMovie.isEmpty()) {
-            String message = MessageFormat.format(MOVIE_WITH_ID_DOES_NOT_EXIST, id);
+            String message = MessageFormat.format(MOVIE_WITH_ID_DOES_NOT_EXIST, ratingUpdateModel.getId());
             LOGGER.error(message);
             throw new NotFoundException(message);
         }
+
         MovieEntity movieEntity = opMovie.get();
-        movieRatingXrefService.addRating(movieEntity, rating);
-        return MessageFormat.format("{0} has been rated with {1}", movieEntity.getName(), rating);
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Optional<MovieRatingXrefEntity> existingRating = movieRatingXrefService.findByMovieIdAndUser(movieEntity.getId(), userDetails.getId());
+        UsersEntity user = userService.getUserByUsername(userDetails.getUsername());
+
+        if (existingRating.isEmpty()) {
+            movieRatingXrefService.addRating(movieEntity, user, ratingUpdateModel.getRating());
+        } else {
+            movieRatingXrefService.updateRating(existingRating.get(), ratingUpdateModel.getRating());
+        }
+
+        return MessageFormat.format("{0} has been rated with {1}", movieEntity.getName(), ratingUpdateModel.getRating());
     }
 
     public ResponseEntity<List<FileInfoModel>> getMovieFiles(int id) {

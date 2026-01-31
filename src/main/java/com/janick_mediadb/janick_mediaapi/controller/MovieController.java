@@ -4,6 +4,7 @@ import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
 import com.janick_mediadb.janick_mediaapi.input.MovieInput;
 import com.janick_mediadb.janick_mediaapi.model.FileInfoModel;
 import com.janick_mediadb.janick_mediaapi.model.MovieModel;
+import com.janick_mediadb.janick_mediaapi.model.RatingUpdateModel;
 import com.janick_mediadb.janick_mediaapi.model.response.MovieResponse;
 import com.janick_mediadb.janick_mediaapi.model.response.MovieSearchCriteria;
 import com.janick_mediadb.janick_mediaapi.service.MovieService;
@@ -61,13 +62,11 @@ public class MovieController {
                 .body(movieModel);
     }
 
-    @PostMapping("/{id}/rate")
-    public ResponseEntity<String> rateMovie(
-            @PathVariable("id") int id,
-            @RequestParam("rating") int rating) {
+    @PostMapping("/rating")
+    public ResponseEntity<String> rateMovie(@RequestBody RatingUpdateModel ratingUpdateModel) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(movieService.rateMovie(id, rating));
+                .body(movieService.rateMovie(ratingUpdateModel));
     }
 
     @GetMapping("/{id}/files")

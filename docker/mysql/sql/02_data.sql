@@ -12,8 +12,20 @@ INSERT INTO refreshtoken_seq VALUES (1);
 --
 -- Initial values for table users
 --
-INSERT INTO users (USERNAME, PASSWORD) VALUES ('admin', '$2a$10$4nrvVgWOyJmY38cxuO9IFuE5iXvtaQMlngfTBAEAVG1fvew21F.qW');
+INSERT INTO users (USERNAME, PASSWORD) VALUES ('admin', '$2a$10$PnY4vgD0A3/0KdX9uany6.8HVPOrois9PPPu3u9wOYMgrg2RG2mBG');
+INSERT INTO users (USERNAME, PASSWORD) VALUES ('alfi', '$2a$10$PnY4vgD0A3/0KdX9uany6.8HVPOrois9PPPu3u9wOYMgrg2RG2mBG');
 
+--
+-- Initial values for table users_roles_xref
+--
+INSERT INTO users_roles_xref (USER_ID, ROLE_ID) VALUES (
+    (SELECT ID FROM users WHERE USERNAME = 'admin'),
+    (SELECT ID FROM roles WHERE NAME = 'ADMIN')
+);
+INSERT INTO users_roles_xref (USER_ID, ROLE_ID) VALUES (
+    (SELECT ID FROM users WHERE USERNAME = 'alfi'),
+    (SELECT ID FROM roles WHERE NAME = 'USER')
+);
 --
 -- Initial values for table movie_genre
 --
@@ -352,12 +364,14 @@ INSERT INTO movie_genre_xref (MOVIE_ID, GENRE_ID) VALUES (
 --
 -- Initial values for table movie_rating
 --
-INSERT INTO movie_rating (MOVIE_ID, RATING) VALUES (
+INSERT INTO movie_rating (MOVIE_ID, USER_ID, RATING) VALUES (
 	(SELECT ID FROM movie WHERE NAME = 'Inception'),
+	(SELECT ID FROM users WHERE USERNAME = 'admin'),
 	3
 );
-INSERT INTO movie_rating (MOVIE_ID, RATING) VALUES (
+INSERT INTO movie_rating (MOVIE_ID, USER_ID, RATING) VALUES (
 	(SELECT ID FROM movie WHERE NAME = 'Inception'),
+	(SELECT ID FROM users WHERE USERNAME = 'alfi'),
 	5
 );
 
@@ -393,12 +407,14 @@ INSERT INTO series_genre_xref (SERIES_ID, GENRE_ID) VALUES (
 --
 -- Initial values for table series_rating
 --
-INSERT INTO series_rating (SERIES_ID, RATING) VALUES (
+INSERT INTO series_rating (SERIES_ID, USER_ID, RATING) VALUES (
 	(SELECT ID FROM series WHERE NAME = 'Breaking Bad'),
+	(SELECT ID FROM users WHERE USERNAME = 'admin'),
 	3
 );
-INSERT INTO series_rating (SERIES_ID, RATING) VALUES (
+INSERT INTO series_rating (SERIES_ID, USER_ID, RATING) VALUES (
 	(SELECT ID FROM series WHERE NAME = 'Breaking Bad'),
+	(SELECT ID FROM users WHERE USERNAME = 'alfi'),
 	5
 );
 
@@ -436,12 +452,14 @@ INSERT INTO game_genre_xref (GAME_ID, GENRE_ID) VALUES (
 --
 -- Initial values for table game_rating
 --
-INSERT INTO game_rating (GAME_ID, RATING) VALUES (
+INSERT INTO game_rating (GAME_ID, USER_ID, RATING) VALUES (
 	(SELECT ID FROM game WHERE NAME = 'Elden Ring'),
+	(SELECT ID FROM users WHERE USERNAME = 'admin'),
 	4
 );
-INSERT INTO game_rating (GAME_ID, RATING) VALUES (
+INSERT INTO game_rating (GAME_ID, USER_ID, RATING) VALUES (
 	(SELECT ID FROM game WHERE NAME = 'Elden Ring'),
+	(SELECT ID FROM users WHERE USERNAME = 'alfi'),
 	5
 );
 

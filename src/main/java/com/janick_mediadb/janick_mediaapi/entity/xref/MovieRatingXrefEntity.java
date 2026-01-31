@@ -2,6 +2,7 @@ package com.janick_mediadb.janick_mediaapi.entity.xref;
 
 import com.janick_mediadb.janick_mediaapi.entity.AbstractEntity;
 import com.janick_mediadb.janick_mediaapi.entity.MovieEntity;
+import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +22,10 @@ public class MovieRatingXrefEntity extends AbstractEntity {
     @ManyToOne(targetEntity = MovieEntity.class)
     @JoinColumn(name = "MOVIE_ID")
     private MovieEntity movie;
+
+    @ManyToOne(targetEntity = UsersEntity.class)
+    @JoinColumn(name = "USER_ID")
+    private UsersEntity user;
 
     private int rating;
 }

@@ -1,6 +1,7 @@
 package com.janick_mediadb.janick_mediaapi.service;
 
 import com.janick_mediadb.janick_mediaapi.entity.MovieEntity;
+import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
 import com.janick_mediadb.janick_mediaapi.entity.xref.MovieRatingXrefEntity;
 import com.janick_mediadb.janick_mediaapi.model.MovieModel;
 import com.janick_mediadb.janick_mediaapi.repository.xref.MovieRatingXrefRepository;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MovieRatingXrefService {
@@ -31,6 +33,10 @@ public class MovieRatingXrefService {
         }
     }
 
+    public Optional<MovieRatingXrefEntity> findByMovieIdAndUser(int movieId, int userId) {
+        return movieRatingXrefRepository.findByMovieIdAndUserId(movieId, userId);
+    }
+
     public void deleteMovieRatingReferenceByMovieId(int movieId) {
         List<MovieRatingXrefEntity> ratings = movieRatingXrefRepository.findAllByMovieId(movieId);
         if (!ratings.isEmpty()) {
@@ -38,12 +44,18 @@ public class MovieRatingXrefService {
         }
     }
 
-    public void addRating(MovieEntity movie, int rating) {
+    public MovieRatingXrefEntity addRating(MovieEntity movie, UsersEntity user, int rating) {
         MovieRatingXrefEntity movieRatingXrefEntity = new MovieRatingXrefEntity();
         movieRatingXrefEntity.setMovie(movie);
+        movieRatingXrefEntity.setUser(user);
         movieRatingXrefEntity.setRating(rating);
 
         LOGGER.info("addRating: Saving movie rating {} for {}", rating, movie.getName());
-        movieRatingXrefRepository.save(movieRatingXrefEntity);
+        return movieRatingXrefRepository.save(movieRatingXrefEntity);
+    }
+
+    public MovieRatingXrefEntity updateRating(MovieRatingXrefEntity movieRating, int rating) {
+        movieRating.setRating(rating);
+        return movieRatingXrefRepository.save(movieRating);
     }
 }
