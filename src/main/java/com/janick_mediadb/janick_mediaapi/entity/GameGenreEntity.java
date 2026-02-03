@@ -34,12 +34,7 @@ public class GameGenreEntity extends AbstractEntity {
         return model;
     }
 
-    public static List<MovieGenreModel> toModels(List<GameGenreEntity> genres) {
-        List<MovieGenreModel> models = new ArrayList<>();
-        for (GameGenreEntity genre : genres) {
-            models.add(genre.toModel());
-        }
-
-        return models;
+    public static List<String> toModels(List<GameGenreEntity> genres) {
+        return genres.stream().map(GameGenreEntity::getName).toList();
     }
 }

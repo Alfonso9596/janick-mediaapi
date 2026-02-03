@@ -25,5 +25,5 @@ public class MovieModel extends AbstractModel {
 
     private int ratingAmount;
 
-    private List<MovieGenreModel> genres;
+    private List<String> genres;
 }

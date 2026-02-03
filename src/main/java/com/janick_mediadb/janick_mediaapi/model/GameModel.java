@@ -23,5 +23,5 @@ public class GameModel extends AbstractModel {
 
     private int ratingAmount;
 
-    private List<MovieGenreModel> genres;
+    private List<String> genres;
 }
