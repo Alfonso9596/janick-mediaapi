@@ -20,6 +20,7 @@ import com.janick_mediadb.janick_mediaapi.model.response.MovieSearchCriteria;
 import com.janick_mediadb.janick_mediaapi.model.specifications.MovieSpecification;
 import com.janick_mediadb.janick_mediaapi.repository.MovieRepository;
 import com.janick_mediadb.janick_mediaapi.utils.NamingUtility;
+import org.apache.catalina.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -149,10 +151,19 @@ public class MovieService {
         MovieEntity movieEntity = new MovieEntity();
         movieEntity.fromInput(movieInput);
 
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UsersEntity user = userService.getUserByUsername(userDetails.getUsername());
+        movieEntity.setUser(user);
+
         String filename = NamingUtility.renameTitleForFilepath(movieInput.getName()) + "_" + movieInput.getYear();
 
         String posterFilename = MOVIE_FILES_PATH + filename + "/" + filename + FileStorageServiceImpl.POSTER_FILE_TYPE;
         movieEntity.setPosterFilepath(posterFilename);
+
+        Instant currentTime = Instant.now();
+
+        movieEntity.setCreatedAt(currentTime);
+        movieEntity.setLastUpdated(currentTime);
 
         movieEntity = movieRepository.save(movieEntity);
         LOGGER.info("saveMovie: Saving movie {}", movieEntity.toModel());

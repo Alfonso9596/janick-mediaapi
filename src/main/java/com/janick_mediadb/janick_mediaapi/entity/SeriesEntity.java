@@ -1,5 +1,6 @@
 package com.janick_mediadb.janick_mediaapi.entity;
 
+import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
 import com.janick_mediadb.janick_mediaapi.entity.xref.SeriesGenreXrefEntity;
 import com.janick_mediadb.janick_mediaapi.input.SeriesInput;
 import com.janick_mediadb.janick_mediaapi.model.SeriesModel;
@@ -7,6 +8,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,6 +34,12 @@ public class SeriesEntity extends AbstractEntity {
     private String yearEnd;
     private int episodeLength;
     private String posterFilepath;
+    private Instant createdAt;
+    private Instant lastUpdated;
+
+    @ManyToOne(targetEntity = UsersEntity.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "USER_ID")
+    private UsersEntity user;
 
     @OneToMany(mappedBy = "series")
     private Set<SeriesGenreXrefEntity> seriesGenreXrefs = new HashSet<>();
@@ -52,6 +61,9 @@ public class SeriesEntity extends AbstractEntity {
         model.setYearEnd(yearEnd);
         model.setEpisodeLength(episodeLength);
         model.setPosterFilepath(posterFilepath);
+        model.setCreatedAt(Date.from(createdAt));
+        model.setLastUpdated(Date.from(lastUpdated));
+        model.setUser(user.toModel());
         return model;
     }
 }

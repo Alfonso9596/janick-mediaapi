@@ -3,6 +3,7 @@ package com.janick_mediadb.janick_mediaapi.model;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -26,4 +27,10 @@ public class MovieModel extends AbstractModel {
     private int ratingAmount;
 
     private List<String> genres;
+
+    private Date createdAt;
+
+    private Date lastUpdated;
+
+    private UserModel user;
 }

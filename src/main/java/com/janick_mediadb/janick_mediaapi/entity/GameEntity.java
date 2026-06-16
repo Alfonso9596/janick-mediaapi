@@ -1,5 +1,6 @@
 package com.janick_mediadb.janick_mediaapi.entity;
 
+import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
 import com.janick_mediadb.janick_mediaapi.entity.xref.GameGenreXrefEntity;
 import com.janick_mediadb.janick_mediaapi.entity.xref.GamePlatformXrefEntity;
 import com.janick_mediadb.janick_mediaapi.input.GameInput;
@@ -8,6 +9,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,6 +32,12 @@ public class GameEntity extends AbstractEntity {
     @Column(length = 4)
     private String year;
     private String posterFilepath;
+    private Instant createdAt;
+    private Instant lastUpdated;
+
+    @ManyToOne(targetEntity = UsersEntity.class, fetch = FetchType.EAGER)
+    @JoinColumn(name = "USER_ID")
+    private UsersEntity user;
 
     @OneToMany(mappedBy = "game")
     private Set<GameGenreXrefEntity> gameGenreXrefs = new HashSet<>();
@@ -49,6 +58,9 @@ public class GameEntity extends AbstractEntity {
         model.setDescription(description);
         model.setYear(year);
         model.setPosterFilepath(posterFilepath);
+        model.setCreatedAt(Date.from(createdAt));
+        model.setLastUpdated(Date.from(lastUpdated));
+        model.setUser(user.toModel());
         return model;
     }
 }

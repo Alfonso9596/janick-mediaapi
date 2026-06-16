@@ -3,20 +3,22 @@ package com.janick_mediadb.janick_mediaapi.service;
 import com.janick_mediadb.janick_mediaapi.entity.GameEntity;
 import com.janick_mediadb.janick_mediaapi.entity.MovieEntity;
 import com.janick_mediadb.janick_mediaapi.entity.SeriesEntity;
-import com.janick_mediadb.janick_mediaapi.model.GameModel;
-import com.janick_mediadb.janick_mediaapi.model.MovieModel;
-import com.janick_mediadb.janick_mediaapi.model.SeriesModel;
-import com.janick_mediadb.janick_mediaapi.model.response.GameResponse;
-import com.janick_mediadb.janick_mediaapi.model.response.MovieResponse;
-import com.janick_mediadb.janick_mediaapi.model.response.SeriesResponse;
-import com.janick_mediadb.janick_mediaapi.repository.GameRepository;
-import com.janick_mediadb.janick_mediaapi.repository.MovieRepository;
-import com.janick_mediadb.janick_mediaapi.repository.SeriesRepository;
+import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
+import com.janick_mediadb.janick_mediaapi.model.*;
+import com.janick_mediadb.janick_mediaapi.model.response.*;
+import com.janick_mediadb.janick_mediaapi.model.specifications.UserSpecification;
+import com.janick_mediadb.janick_mediaapi.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,6 +34,12 @@ public class AdminService {
 
     @Autowired
     private GameRepository gameRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Autowired
     private MovieGenreXrefService movieGenreXrefService;
@@ -84,7 +92,7 @@ public class AdminService {
     }
 
     public GameResponse getGamesData() {
-        List<GameEntity> games =  gameRepository.findAll();
+        List<GameEntity> games = gameRepository.findAll();
         List<GameModel> content = games.stream().map(g -> {
             GameModel model = g.toModel();
             gameGenreXrefService.collectGenres(g.getId(), model);
@@ -97,5 +105,49 @@ public class AdminService {
         gameResponse.setTotalElements(games.size());
 
         return gameResponse;
+    }
+
+    public UserResponse getAllUsers(int page, int pageSize, UserSearchCriteria criteria) {
+        Sort sort = Sort.by("username").ascending();
+
+        Pageable pageable = PageRequest.of(page, pageSize, sort);
+        Specification<UsersEntity> specification = createSpecs(criteria);
+
+        Page<UsersEntity> users = userRepository.findAll(specification, pageable);
+
+        List<UsersEntity> listOfUsers = users.getContent();
+        List<UserModel> content = listOfUsers.stream().map(UsersEntity::toModel).toList();
+
+        UserResponse userResponse = new UserResponse();
+        userResponse.setContent(content);
+        userResponse.setPage(users.getNumber());
+        userResponse.setPageSize(users.getSize());
+        userResponse.setTotalElements(users.getTotalElements());
+        userResponse.setTotalPages(users.getTotalPages());
+        userResponse.setLast(users.isLast());
+
+        return userResponse;
+    }
+
+    public List<RoleModel> getAllRoles() {
+        List<RoleModel> roles = new ArrayList<>();
+        roleRepository.findAllOrderByName().forEach(role -> roles.add(role.toModel()));
+
+        LOGGER.info("getAllRoles: Found a total of {} roles.", roles.size());
+        return roles;
+    }
+
+    private Specification<UsersEntity> createSpecs(UserSearchCriteria criteria) {
+        Specification<UsersEntity> spec = Specification.unrestricted();
+
+        if (criteria.getUsername() != null) {
+            spec = spec.and(UserSpecification.likeUsername(criteria.getUsername()));
+        }
+
+        if (criteria.getRole() != null) {
+            spec = spec.and(UserSpecification.containsRole(criteria.getRole()));
+        }
+
+        return spec;
     }
 }

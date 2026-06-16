@@ -1,6 +1,7 @@
 package com.janick_mediadb.janick_mediaapi.entity.security;
 
 import com.janick_mediadb.janick_mediaapi.entity.AbstractEntity;
+import com.janick_mediadb.janick_mediaapi.model.UserModel;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,4 +29,15 @@ public class UsersEntity extends AbstractEntity {
         joinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "ID"),
         inverseJoinColumns = @JoinColumn(name = "ROLE_ID", referencedColumnName = "ID"))
     private Set<RoleEntity> roles;
+
+    private boolean isEnabled;
+
+    public UserModel toModel() {
+        UserModel model = new UserModel();
+        model.setId(id);
+        model.setUsername(username);
+        model.setRoles(roles.stream().map(r -> r.getName().name()).toList());
+        model.setEnabled(isEnabled);
+        return model;
+    }
 }

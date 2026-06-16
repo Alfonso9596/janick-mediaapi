@@ -1,7 +1,9 @@
 package com.janick_mediadb.janick_mediaapi.service;
 
+import com.janick_mediadb.janick_mediaapi.auth.UserDetailsImpl;
 import com.janick_mediadb.janick_mediaapi.entity.MovieGenreEntity;
 import com.janick_mediadb.janick_mediaapi.entity.SeriesEntity;
+import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
 import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
 import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
 import com.janick_mediadb.janick_mediaapi.input.MovieGenreInput;
@@ -20,9 +22,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -46,6 +50,9 @@ public class SeriesService {
 
     @Autowired
     private MovieGenreService genreService;
+
+    @Autowired
+    private UserService userService;
 
     public SeriesResponse getAllSeries(int page, int pageSize, String sortBy, String sortDir, SeriesSearchCriteria criteria) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
@@ -130,10 +137,19 @@ public class SeriesService {
         SeriesEntity seriesEntity = new SeriesEntity();
         seriesEntity.fromInput(seriesInput);
 
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UsersEntity user = userService.getUserByUsername(userDetails.getUsername());
+        seriesEntity.setUser(user);
+
         String filename = NamingUtility.renameTitleForFilepath(seriesInput.getName()) + "_" + seriesInput.getYearStart();
 
         String posterFilename = SERIES_FILES_PATH + filename + "/" + filename + FileStorageServiceImpl.POSTER_FILE_TYPE;
         seriesEntity.setPosterFilepath(posterFilename);
+
+        Instant currentTime = Instant.now();
+
+        seriesEntity.setCreatedAt(currentTime);
+        seriesEntity.setLastUpdated(currentTime);
 
         seriesEntity = seriesRepository.save(seriesEntity);
         LOGGER.info("saveSeries: Saving series {}", seriesEntity.toModel());

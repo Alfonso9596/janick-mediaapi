@@ -1,6 +1,7 @@
 package com.janick_mediadb.janick_mediaapi.entity.security;
 
 import com.janick_mediadb.janick_mediaapi.entity.AbstractEntity;
+import com.janick_mediadb.janick_mediaapi.model.RoleModel;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,4 +20,11 @@ public class RoleEntity extends AbstractEntity {
 
     @Enumerated(EnumType.STRING)
     private ERole name;
+
+    public RoleModel toModel() {
+        RoleModel model = new RoleModel();
+        model.setId(id);
+        model.setName(name.name());
+        return model;
+    }
 }

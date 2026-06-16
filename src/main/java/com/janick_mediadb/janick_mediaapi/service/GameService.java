@@ -1,7 +1,9 @@
 package com.janick_mediadb.janick_mediaapi.service;
 
+import com.janick_mediadb.janick_mediaapi.auth.UserDetailsImpl;
 import com.janick_mediadb.janick_mediaapi.entity.GameEntity;
 import com.janick_mediadb.janick_mediaapi.entity.GameGenreEntity;
+import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
 import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
 import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
 import com.janick_mediadb.janick_mediaapi.input.GameInput;
@@ -20,9 +22,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -46,6 +50,9 @@ public class GameService {
 
     @Autowired
     private GameGenreService genreService;
+
+    @Autowired
+    private UserService userService;
 
     public GameResponse getAllGames(int page, int pageSize, String sortBy, String sortDir, GameSearchCriteria criteria) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
@@ -130,10 +137,19 @@ public class GameService {
         GameEntity gameEntity = new GameEntity();
         gameEntity.fromInput(gameInput);
 
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UsersEntity user = userService.getUserByUsername(userDetails.getUsername());
+        gameEntity.setUser(user);
+
         String filename = NamingUtility.renameTitleForFilepath(gameInput.getName()) + "_" + gameInput.getYear();
 
         String posterFilename = GAME_FILES_PATH + filename + "/" + filename + FileStorageServiceImpl.POSTER_FILE_TYPE;
         gameEntity.setPosterFilepath(posterFilename);
+
+        Instant currentTime = Instant.now();
+
+        gameEntity.setCreatedAt(currentTime);
+        gameEntity.setLastUpdated(currentTime);
 
         gameEntity = gameRepository.save(gameEntity);
         LOGGER.info("saveGame: Saving game {}", gameEntity.toModel());

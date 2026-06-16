@@ -110,93 +110,126 @@ INSERT INTO game_genre (ID, NAME) VALUES (45, 'Fantasy');
 --
 -- Initial values for table movie
 --
-INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH) VALUES (
+INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH, CREATED_AT, LAST_UPDATED, USER_ID) VALUES (
 	1,
 	'Ein Dieb stiehlt Unternehmensgeheimnisse mithilfe einer Technologie für gemeinsames Träumen. Dann erhält er den Auftrag, eine Idee im Kopf eines Geschäftsführers festzusetzen.',
 	148,
 	'Inception',
 	2012,
-	'movies/inception_2012/inception_2012.jpg'
+	'movies/inception_2012/inception_2012.jpg',
+	'2026-02-07T15:24:53.365764',
+	'2026-02-07T15:24:53.365764',
+	1
 );
-INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH) VALUES (
+INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH, CREATED_AT, LAST_UPDATED, USER_ID) VALUES (
     2,
     'Der alternde Patriarch einer Verbrecherdynastie will die Herrschaft über sein geheimes Reich auf seinen widerwilligen Sohn übertragen.',
     175,
     'Der Pate',
     1972,
-    'movies/der_pate_1972/der_pate_1972.jpg'
+    'movies/der_pate_1972/der_pate_1972.jpg',
+    '2026-02-07T15:24:53.365764',
+    '2026-02-07T15:24:53.365764',
+    1
 );
-INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH) VALUES (
+INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH, CREATED_AT, LAST_UPDATED, USER_ID) VALUES (
     3,
     'Als der fiese Joker Verwüstung und Chaos über die Menschen in Gotham bringt, muss sich der "dunkle Ritter" einer der härtesten psychologischen Prüfungen seiner Fähigkeit, Unrecht zu bekämpfen, unterziehen.',
     152,
     'The Dark Knight',
     2008,
-    'movies/the_dark_knight_2008/the_dark_knight_2008.jpg'
+    'movies/the_dark_knight_2008/the_dark_knight_2008.jpg',
+    '2026-02-07T15:24:53.365764',
+    '2026-02-07T15:24:53.365764',
+    1
 );
-INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH) VALUES (
+INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH, CREATED_AT, LAST_UPDATED, USER_ID) VALUES (
     4,
     'Gandalf und Aragorn führen die Männer der Mittelerde in den Kampf gegen Saurons Armee, um ihn von Frodo und Sam abzulenken, die sich gerade dem Schicksalsberg mit dem Einen Ring nähern.',
     201,
     'Der Herr der Ringe: Die Rückkehr des Königs',
     2003,
-    'movies/der_herr_der_ringe_die_rückkehr_des_königs_2003/der_herr_der_ringe_die_rückkehr_des_königs_2003.jpg'
+    'movies/der_herr_der_ringe_die_rückkehr_des_königs_2003/der_herr_der_ringe_die_rückkehr_des_königs_2003.jpg',
+    '2026-02-07T15:24:53.365764',
+    '2026-02-07T15:24:53.365764',
+    1
 );
-INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH) VALUES (
+INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH, CREATED_AT, LAST_UPDATED, USER_ID) VALUES (
     5,
     'Im Zweiten Weltkrieg macht sich Oskar Schindler in dem von den Deutschen besetzten Polen zunehmend Sorgen um seine jüdischen Mitarbeiter, nachdem er Zeuge von deren Verfolgung durch die Nazis geworden ist.',
     195,
     'Schindlers Liste',
     1993,
-    'movies/schindlers_liste_1993/schindlers_liste_1993.jpg'
+    'movies/schindlers_liste_1993/schindlers_liste_1993.jpg',
+    '2026-02-07T15:24:53.365764',
+    '2026-02-07T15:24:53.365764',
+    1
 );
-INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH) VALUES (
+INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH, CREATED_AT, LAST_UPDATED, USER_ID) VALUES (
     6,
     'Die Leben zweier Auftragskiller, eines Boxers, einer Gangsterbraut und eines Pärchens, das Diner-Restaurants überfällt, werden in vier Episoden miteinander verwoben, die aus Gewalt und Erlösung bestehen.',
     214,
     'Pulp Fiction',
     1993,
-    'movies/pulp_fiction_1993/pulp_fiction_1993.jpg'
+    'movies/pulp_fiction_1993/pulp_fiction_1993.jpg',
+    '2026-02-07T15:24:53.365764',
+    '2026-02-07T15:24:53.365764',
+    1
 );
-INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH) VALUES (
+INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH, CREATED_AT, LAST_UPDATED, USER_ID) VALUES (
     7,
     'Forrest Gump, obgleich nicht sonderlich mit Intelligenz gesegnet, war doch durch Zufall bei vielen historischen Augenblicken zugegen; Jenny Curran, seine große Liebe, entzieht sich ihm jedoch.',
     144,
     'Forrest Gump',
     1994,
-    'movies/forrest_gump_1994/forrest_gump_1994.jpg'
+    'movies/forrest_gump_1994/forrest_gump_1994.jpg',
+    '2026-02-07T15:24:53.365764',
+    '2026-02-07T15:24:53.365764',
+    1
 );
-INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH) VALUES (
+INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH, CREATED_AT, LAST_UPDATED, USER_ID) VALUES (
     8,
     'Ein unter Schlaflosigkeit leidender Büroangestellter sucht nach einer Möglichkeit, sein Leben zu ändern, und trifft dabei auf einen sorglosen Seifenhändler, der im Untergrund einen Kampfclub unterhält, der sich als etwas noch viel Größeres herausstellt.',
     139,
     'Fight Club',
     1999,
-    'movies/fight_club_1999/fight_club_1999.jpg'
+    'movies/fight_club_1999/fight_club_1999.jpg',
+    '2026-02-07T15:24:53.365764',
+    '2026-02-07T15:24:53.365764',
+    1
 );
-INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH) VALUES (
+INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH, CREATED_AT, LAST_UPDATED, USER_ID) VALUES (
     9,
     'Ein Computerhacker erfährt von mysteriösen Rebellen die Wahrheit über seine Realität und seine Rolle im Krieg gegen deren Kontrolleure.',
     136,
     'Matrix',
     1999,
-    'movies/matrix_1999/matrix_1999.jpg'
+    'movies/matrix_1999/matrix_1999.jpg',
+    '2026-02-07T15:24:53.365764',
+    '2026-02-07T15:24:53.365764',
+    1
 );
-INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH) VALUES (
+INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH, CREATED_AT, LAST_UPDATED, USER_ID) VALUES (
     10,
     'Ein Forscherteam reist auf der Suche nach neuen Welten durch ein Wurmloch im Universum, um das Überleben der Menschheit sicherzustellen.',
     169,
     'Interstellar',
     2014,
-    'movies/interstellar_2014/interstellar_2014.jpg'
+    'movies/interstellar_2014/interstellar_2014.jpg',
+    '2026-02-07T15:24:53.365764',
+    '2026-02-07T15:24:53.365764',
+    1
 );
-INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH) VALUES (
+INSERT INTO movie (ID, DESCRIPTION, LENGTH, NAME, YEAR, POSTER_FILEPATH, CREATED_AT, LAST_UPDATED, USER_ID) VALUES (
     11,
     'Zwei Kripobeamte, ein Neuling und ein altgedienter Fuchs jagen einen Serienmörder, der die sieben Todsünden als seinen Modus Operandi verwendet.',
     127,
     'Sieben',
     1995,
-    'movies/sieben_1995/sieben_1995.jpg'
+    'movies/sieben_1995/sieben_1995.jpg',
+    '2026-02-07T15:24:53.365764',
+    '2026-02-07T15:24:53.365764',
+    1
 );
 
 --
@@ -378,14 +411,17 @@ INSERT INTO movie_rating (MOVIE_ID, USER_ID, RATING) VALUES (
 --
 -- Initial values for table series
 --
-INSERT INTO series (ID, DESCRIPTION, EPISODE_LENGTH, NAME, YEAR_START, YEAR_END, POSTER_FILEPATH) VALUES (
+INSERT INTO series (ID, DESCRIPTION, EPISODE_LENGTH, NAME, YEAR_START, YEAR_END, POSTER_FILEPATH, CREATED_AT, LAST_UPDATED, USER_ID) VALUES (
 	1,
 	'Ein Highschool-Chemielehrer, bei dem ein inoperabler Lungenkrebs diagnostiziert wurde, wendet sich der Herstellung und dem Verkauf von Methamphetamin zu, um die Zukunft seiner Familie zu sichern.',
 	45,
 	'Breaking Bad',
 	2008,
 	2013,
-	'series/breaking_bad_2008/breaking_bad_2008.jpg'
+	'series/breaking_bad_2008/breaking_bad_2008.jpg',
+	'2026-02-07T15:24:53.365764',
+    '2026-02-07T15:24:53.365764',
+    1
 );
 
 --
@@ -421,12 +457,15 @@ INSERT INTO series_rating (SERIES_ID, USER_ID, RATING) VALUES (
 --
 -- Initial values for table game
 --
-INSERT INTO game (ID, DESCRIPTION, NAME, YEAR, POSTER_FILEPATH) VALUES (
+INSERT INTO game (ID, DESCRIPTION, NAME, YEAR, POSTER_FILEPATH, CREATED_AT, LAST_UPDATED, USER_ID) VALUES (
 	1,
 	'DAS NEUE FANTASY-ACTION-RPG. Erhebt Euch, Befleckter, und lasst Euch von der Gnade leiten, um die Macht des Eldenrings zu befehligen und zum Eldenfürsten im Zwischenland zu werden.',
 	'Elden Ring',
 	2022,
-	'games/elden_ring_2022/elden_ring_2022.jpg'
+	'games/elden_ring_2022/elden_ring_2022.jpg',
+	'2026-02-07T15:24:53.365764',
+    '2026-02-07T15:24:53.365764',
+    1
 );
 
 --

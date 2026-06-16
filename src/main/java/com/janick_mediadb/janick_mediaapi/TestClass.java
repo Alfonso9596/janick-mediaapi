@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 
 public class TestClass {
 
@@ -17,7 +18,8 @@ public class TestClass {
     private static PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public static void main(String[] args) {
-        testNamingUtility("Der Herr der Ringe: Die Rückkehr des Königs");
+        //testNamingUtility("Der Herr der Ringe: Die Rückkehr des Königs");
+        System.out.println(Instant.now());
     }
 
     private static void testNamingUtility(String title) {

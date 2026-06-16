@@ -83,6 +83,7 @@ public class AuthServiceImpl implements AuthService {
         UsersEntity user = new UsersEntity();
         user.setUsername(registerModel.getUsername());
         user.setPassword(passwordEncoder.encode(registerModel.getPassword()));
+        user.setEnabled(true);
 
         Set<RoleEntity> roles = new HashSet<>();
         RoleEntity userRole = roleRepository.findByName(ERole.USER).get();
