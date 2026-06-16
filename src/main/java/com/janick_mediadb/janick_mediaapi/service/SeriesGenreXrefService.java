@@ -13,8 +13,12 @@ import java.util.List;
 @Service
 public class SeriesGenreXrefService {
 
+    private final SeriesGenreXrefRepository seriesGenreXrefRepository;
+
     @Autowired
-    private SeriesGenreXrefRepository seriesGenreXrefRepository;
+    public SeriesGenreXrefService(SeriesGenreXrefRepository seriesGenreXrefRepository) {
+        this.seriesGenreXrefRepository = seriesGenreXrefRepository;
+    }
 
     public List<SeriesEntity> findSeriesByGenre(int genreId) {
         return seriesGenreXrefRepository.findSeriesByGenre(genreId);

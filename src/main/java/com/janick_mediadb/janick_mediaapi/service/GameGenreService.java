@@ -26,11 +26,15 @@ public class GameGenreService {
     private static final String GENRE_ID_NOT_EXIST = "Genre with id {0} does not exist";
     private static final String GENRE_ALREADY_REGISTERED = "The genre {0} is already registered";
 
-    @Autowired
-    private GameGenreRepository gameGenreRepository;
+    private final GameGenreRepository gameGenreRepository;
+
+    private final GameGenreXrefService gameGenreXrefService;
 
     @Autowired
-    private GameGenreXrefService gameGenreXrefService;
+    public GameGenreService(GameGenreRepository gameGenreRepository, GameGenreXrefService gameGenreXrefService) {
+        this.gameGenreRepository = gameGenreRepository;
+        this.gameGenreXrefService = gameGenreXrefService;
+    }
 
     public List<MovieGenreModel> getAllGenres() {
         List<MovieGenreModel> genres = new ArrayList<>();

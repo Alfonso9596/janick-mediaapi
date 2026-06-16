@@ -80,13 +80,13 @@ public class JWTUtils {
         try {
             Jwts.parser().verifyWith(key()).build().parse(authToken);
             return true;
-        } catch (MalformedJwtException malformedJwtException) {
+        } catch (MalformedJwtException _) {
             throw new BadRequestException("Invalid JWT Token");
-        } catch (ExpiredJwtException expiredJwtException) {
+        } catch (ExpiredJwtException _) {
             throw new BadRequestException("Expired JWT Token");
-        } catch (UnsupportedJwtException unsupportedJwtException) {
+        } catch (UnsupportedJwtException _) {
             throw new BadRequestException("Unsupported JWT Token");
-        } catch (IllegalArgumentException illegalArgumentException) {
+        } catch (IllegalArgumentException _) {
             throw new BadRequestException("JWT claims string is null or empty");
         }
     }

@@ -22,8 +22,12 @@ public class GamePlatformService {
 
     private static final String PLATFORM_ALREADY_REGISTERED = "The platform {0} is already registered";
 
+    private final GamePlatformRepository gamePlatformRepository;
+
     @Autowired
-    private GamePlatformRepository gamePlatformRepository;
+    public GamePlatformService(GamePlatformRepository gamePlatformRepository) {
+        this.gamePlatformRepository = gamePlatformRepository;
+    }
 
     public List<GamePlatformModel> getAllPlatforms() {
         List<GamePlatformModel> platforms = new ArrayList<>();

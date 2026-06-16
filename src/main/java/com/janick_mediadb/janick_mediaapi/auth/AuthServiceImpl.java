@@ -26,24 +26,28 @@ import java.util.Set;
 
 @Service
 public class AuthServiceImpl implements AuthService {
+    
+    private final AuthenticationManager authenticationManager;
+
+    private final UserRepository userRepository;
+
+    private final RoleRepository roleRepository;
+
+    private final PasswordEncoder passwordEncoder;
+
+    private final JWTUtils jwtUtils;
+
+    private final RefreshTokenService refreshTokenService;
 
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JWTUtils jwtUtils;
-
-    @Autowired
-    private RefreshTokenService refreshTokenService;
+    public AuthServiceImpl(AuthenticationManager authenticationManager, UserRepository userRepository,  RoleRepository roleRepository, PasswordEncoder passwordEncoder, JWTUtils jwtUtils, RefreshTokenService refreshTokenService) {
+        this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtils = jwtUtils;
+        this.refreshTokenService = refreshTokenService;
+    }
 
     @Override
     public ResponseEntity<JWTAuthResponse> login(RegisterLoginModel loginModel) {
@@ -86,7 +90,7 @@ public class AuthServiceImpl implements AuthService {
         user.setEnabled(true);
 
         Set<RoleEntity> roles = new HashSet<>();
-        RoleEntity userRole = roleRepository.findByName(ERole.USER).get();
+        RoleEntity userRole = roleRepository.findByName(ERole.USER).orElseThrow(() -> new NotFoundException("Role with name " + ERole.USER + " not found!"));
         roles.add(userRole);
         user.setRoles(roles);
 

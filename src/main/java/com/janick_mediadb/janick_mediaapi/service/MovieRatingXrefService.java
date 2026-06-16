@@ -18,8 +18,12 @@ public class MovieRatingXrefService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MovieRatingXrefService.class);
 
+    private final MovieRatingXrefRepository movieRatingXrefRepository;
+
     @Autowired
-    private MovieRatingXrefRepository movieRatingXrefRepository;
+    public MovieRatingXrefService(MovieRatingXrefRepository movieRatingXrefRepository) {
+        this.movieRatingXrefRepository = movieRatingXrefRepository;
+    }
 
     public void collectRatings(int movieId, MovieModel model) {
         List<MovieRatingXrefEntity> ratings = movieRatingXrefRepository.findAllByMovieId(movieId);

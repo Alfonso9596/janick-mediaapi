@@ -20,7 +20,6 @@ import com.janick_mediadb.janick_mediaapi.model.response.MovieSearchCriteria;
 import com.janick_mediadb.janick_mediaapi.model.specifications.MovieSpecification;
 import com.janick_mediadb.janick_mediaapi.repository.MovieRepository;
 import com.janick_mediadb.janick_mediaapi.utils.NamingUtility;
-import org.apache.catalina.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,20 +52,24 @@ public class MovieService {
     private static final String MOVIE_FILES_PATH = "movies/";
     public static final String MOVIE_WITH_ID_DOES_NOT_EXIST = "Movie with id {0} does not exist";
 
-    @Autowired
-    private MovieRepository movieRepository;
+    private final MovieRepository movieRepository;
+
+    private final MovieGenreXrefService movieGenreXrefService;
+
+    private final MovieRatingXrefService movieRatingXrefService;
+
+    private final MovieGenreService genreService;
+
+    private final UserService userService;
 
     @Autowired
-    private MovieGenreXrefService movieGenreXrefService;
-
-    @Autowired
-    private MovieRatingXrefService movieRatingXrefService;
-
-    @Autowired
-    private MovieGenreService genreService;
-
-    @Autowired
-    private UserService userService;
+    public MovieService(MovieRepository movieRepository, MovieGenreXrefService movieGenreXrefService, MovieRatingXrefService movieRatingXrefService, MovieGenreService genreService, UserService userService) {
+        this.movieRepository = movieRepository;
+        this.movieGenreXrefService = movieGenreXrefService;
+        this.movieRatingXrefService = movieRatingXrefService;
+        this.genreService = genreService;
+        this.userService = userService;
+    }
 
     public MovieResponse getAllMovies(int page, int pageSize, String sortBy, String sortDir, MovieSearchCriteria criteria) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
@@ -137,7 +140,7 @@ public class MovieService {
                 input.setName(genre);
                 try {
                     genreService.saveGenre(input);
-                } catch (BadRequestException e) {
+                } catch (BadRequestException _) {
                     LOGGER.warn("Genre {} already exists", genre);
                 }
             }

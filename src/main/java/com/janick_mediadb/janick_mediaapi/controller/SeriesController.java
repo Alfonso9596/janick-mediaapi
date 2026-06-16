@@ -17,8 +17,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/series")
 public class SeriesController {
 
+    private final SeriesService seriesService;
+
     @Autowired
-    private SeriesService seriesService;
+    public SeriesController(SeriesService seriesService) {
+        this.seriesService = seriesService;
+    }
 
     @GetMapping
     public SeriesResponse getAllSeries(

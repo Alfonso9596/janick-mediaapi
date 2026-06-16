@@ -13,7 +13,7 @@ public abstract class AbstractEntity {
         mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
         try {
             result = mapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException _) {
             result = super.toString();
         }
         return result;

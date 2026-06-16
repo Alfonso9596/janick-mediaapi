@@ -13,8 +13,12 @@ import java.util.List;
 @Service
 public class GameGenreXrefService {
 
+    private final GameGenreXrefRepository gameGenreXrefRepository;
+
     @Autowired
-    private GameGenreXrefRepository gameGenreXrefRepository;
+    public GameGenreXrefService(GameGenreXrefRepository gameGenreXrefRepository) {
+        this.gameGenreXrefRepository = gameGenreXrefRepository;
+    }
 
     public List<GameEntity> findGamesByGenre(int genreId) {
         return gameGenreXrefRepository.findGamesByGenre(genreId);

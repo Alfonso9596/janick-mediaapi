@@ -16,8 +16,12 @@ public class SeriesRatingXrefService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeriesRatingXrefService.class);
 
+    private final SeriesRatingXrefRepository seriesRatingXrefRepository;
+
     @Autowired
-    private SeriesRatingXrefRepository seriesRatingXrefRepository;
+    public SeriesRatingXrefService(SeriesRatingXrefRepository seriesRatingXrefRepository) {
+        this.seriesRatingXrefRepository = seriesRatingXrefRepository;
+    }
 
     public void collectRatings(int seriesId, SeriesModel model) {
         List<SeriesRatingXrefEntity> ratings = seriesRatingXrefRepository.findAllBySeriesId(seriesId);

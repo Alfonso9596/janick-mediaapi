@@ -14,8 +14,12 @@ import java.util.List;
 @RequestMapping("/api/platforms")
 public class GamePlatformController {
 
+    private final GamePlatformService gamePlatformService;
+
     @Autowired
-    private GamePlatformService gamePlatformService;
+    public  GamePlatformController(GamePlatformService gamePlatformService) {
+        this.gamePlatformService = gamePlatformService;
+    }
 
     @GetMapping
     public ResponseEntity<List<GamePlatformModel>> getAllPlatforms() {

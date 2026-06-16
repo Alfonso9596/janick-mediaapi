@@ -34,11 +34,15 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 )
 public class SecurityConfig {
 
-    @Autowired
-    CustomUserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
+
+    private final JWTAuthenticationEntryPoint unauthorizedHandler;
 
     @Autowired
-    private JWTAuthenticationEntryPoint unauthorizedHandler;
+    public SecurityConfig(CustomUserDetailsService userDetailsService, JWTAuthenticationEntryPoint unauthorizedHandler) {
+        this.userDetailsService = userDetailsService;
+        this.unauthorizedHandler = unauthorizedHandler;
+    }
 
     @Bean
     public JWTAuthenticationFilter authenticationJwtTokenFilter() {
@@ -55,7 +59,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) {
         return configuration.getAuthenticationManager();
     }
 
@@ -65,7 +69,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))

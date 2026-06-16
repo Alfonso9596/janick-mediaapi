@@ -13,8 +13,12 @@ import java.util.List;
 @Service
 public class MovieGenreXrefService {
 
+    private final MovieGenreXrefRepository movieGenreXrefRepository;
+
     @Autowired
-    private MovieGenreXrefRepository movieGenreXrefRepository;
+    public MovieGenreXrefService(MovieGenreXrefRepository movieGenreXrefRepository) {
+        this.movieGenreXrefRepository = movieGenreXrefRepository;
+    }
 
     public List<MovieEntity> findMoviesByGenre(int genreId) {
         return movieGenreXrefRepository.findMoviesByGenre(genreId);

@@ -39,20 +39,24 @@ public class SeriesService {
     private static final String SERIES_FILES_PATH = "series/";
     public static final String SERIES_WITH_ID_DOES_NOT_EXIST = "Series with id {0} does not exist";
 
-    @Autowired
-    private SeriesRepository seriesRepository;
+    private final SeriesRepository seriesRepository;
+
+    private final SeriesGenreXrefService seriesGenreXrefService;
+
+    private final SeriesRatingXrefService seriesRatingXrefService;
+
+    private final MovieGenreService genreService;
+
+    private final UserService userService;
 
     @Autowired
-    private SeriesGenreXrefService seriesGenreXrefService;
-
-    @Autowired
-    private SeriesRatingXrefService seriesRatingXrefService;
-
-    @Autowired
-    private MovieGenreService genreService;
-
-    @Autowired
-    private UserService userService;
+    public SeriesService(SeriesRepository seriesRepository, SeriesGenreXrefService seriesGenreXrefService, SeriesRatingXrefService seriesRatingXrefService, MovieGenreService genreService, UserService userService) {
+        this.seriesRepository = seriesRepository;
+        this.seriesGenreXrefService = seriesGenreXrefService;
+        this.seriesRatingXrefService = seriesRatingXrefService;
+        this.genreService = genreService;
+        this.userService = userService;
+    }
 
     public SeriesResponse getAllSeries(int page, int pageSize, String sortBy, String sortDir, SeriesSearchCriteria criteria) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
@@ -123,7 +127,7 @@ public class SeriesService {
                 input.setName(genre);
                 try {
                     genreService.saveGenre(input);
-                } catch (BadRequestException e) {
+                } catch (BadRequestException _) {
                     LOGGER.warn("Genre {} already exists", genre);
                 }
             }

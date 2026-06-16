@@ -12,8 +12,12 @@ import java.util.List;
 @Component
 public class RefreshTokenScheduler {
 
+    private final RefreshTokenRepository refreshTokenRepository;
+
     @Autowired
-    RefreshTokenRepository refreshTokenRepository;
+    public RefreshTokenScheduler(RefreshTokenRepository refreshTokenRepository) {
+        this.refreshTokenRepository = refreshTokenRepository;
+    }
 
     @Scheduled(cron = "0 0 12 * * *")
     public void clearRefreshTokens() {

@@ -16,8 +16,12 @@ public class GameRatingXrefService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GameRatingXrefService.class);
 
+    private final GameRatingXrefRepository gameRatingXrefRepository;
+
     @Autowired
-    private GameRatingXrefRepository gameRatingXrefRepository;
+    public GameRatingXrefService(GameRatingXrefRepository gameRatingXrefRepository) {
+        this.gameRatingXrefRepository = gameRatingXrefRepository;
+    }
 
     public void collectRatings(int gameId, GameModel model) {
         List<GameRatingXrefEntity> ratings = gameRatingXrefRepository.findAllByGameId(gameId);

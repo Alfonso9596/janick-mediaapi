@@ -15,11 +15,15 @@ import java.util.List;
 @RequestMapping("/api/genres")
 public class GenreController {
 
-    @Autowired
-    private MovieGenreService movieGenreService;
+    private final MovieGenreService movieGenreService;
+
+    private final GameGenreService gameGenreService;
 
     @Autowired
-    private GameGenreService gameGenreService;
+    public GenreController(MovieGenreService movieGenreService, GameGenreService gameGenreService) {
+        this.movieGenreService = movieGenreService;
+        this.gameGenreService = gameGenreService;
+    }
 
     @GetMapping("/movies")
     public ResponseEntity<List<MovieGenreModel>> getAllMovieGenres() {

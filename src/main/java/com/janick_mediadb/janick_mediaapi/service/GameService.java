@@ -39,20 +39,24 @@ public class GameService {
     private static final String GAME_FILES_PATH = "games/";
     public static final String GAME_WITH_ID_DOES_NOT_EXIST = "Game with id {0} does not exist";
 
-    @Autowired
-    private GameRepository gameRepository;
+    private final GameRepository gameRepository;
+
+    private final GameGenreXrefService gameGenreXrefService;
+
+    private final GameRatingXrefService gameRatingXrefService;
+
+    private final GameGenreService genreService;
+
+    private final UserService userService;
 
     @Autowired
-    private GameGenreXrefService gameGenreXrefService;
-
-    @Autowired
-    private GameRatingXrefService gameRatingXrefService;
-
-    @Autowired
-    private GameGenreService genreService;
-
-    @Autowired
-    private UserService userService;
+    public GameService(GameRepository gameRepository, GameGenreXrefService gameGenreXrefService, GameRatingXrefService gameRatingXrefService, GameGenreService gameGenreService, UserService userService) {
+        this.gameRepository = gameRepository;
+        this.gameGenreXrefService = gameGenreXrefService;
+        this.gameRatingXrefService = gameRatingXrefService;
+        this.genreService = gameGenreService;
+        this.userService = userService;
+    }
 
     public GameResponse getAllGames(int page, int pageSize, String sortBy, String sortDir, GameSearchCriteria criteria) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
@@ -123,7 +127,7 @@ public class GameService {
                 input.setName(genre);
                 try {
                     genreService.saveGenre(input);
-                } catch (BadRequestException e) {
+                } catch (BadRequestException _) {
                     LOGGER.warn("Genre {} already exists", genre);
                 }
             }

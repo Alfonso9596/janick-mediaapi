@@ -26,38 +26,42 @@ public class AdminService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminService.class);
 
-    @Autowired
-    private MovieRepository movieRepository;
+    private final MovieRepository movieRepository;
+
+    private final SeriesRepository seriesRepository;
+
+    private final GameRepository gameRepository;
+
+    private final UserRepository userRepository;
+
+    private final RoleRepository roleRepository;
+
+    private final MovieGenreXrefService movieGenreXrefService;
+
+    private final MovieRatingXrefService movieRatingXrefService;
+
+    private final SeriesGenreXrefService seriesGenreXrefService;
+
+    private final SeriesRatingXrefService seriesRatingXrefService;
+
+    private final GameGenreXrefService gameGenreXrefService;
+
+    private final GameRatingXrefService gameRatingXrefService;
 
     @Autowired
-    private SeriesRepository seriesRepository;
-
-    @Autowired
-    private GameRepository gameRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private MovieGenreXrefService movieGenreXrefService;
-
-    @Autowired
-    private MovieRatingXrefService movieRatingXrefService;
-
-    @Autowired
-    private SeriesGenreXrefService seriesGenreXrefService;
-
-    @Autowired
-    private SeriesRatingXrefService seriesRatingXrefService;
-
-    @Autowired
-    private GameGenreXrefService gameGenreXrefService;
-
-    @Autowired
-    private GameRatingXrefService gameRatingXrefService;
+    public AdminService(MovieRepository movieRepository, SeriesRepository seriesRepository, GameRepository gameRepository, UserRepository userRepository, RoleRepository roleRepository, MovieGenreXrefService movieGenreXrefService, MovieRatingXrefService movieRatingXrefService, SeriesGenreXrefService seriesGenreXrefService, SeriesRatingXrefService seriesRatingXrefService, GameGenreXrefService gameGenreXrefService, GameRatingXrefService gameRatingXrefService) {
+        this.movieRepository = movieRepository;
+        this.seriesRepository = seriesRepository;
+        this.gameRepository = gameRepository;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.movieGenreXrefService = movieGenreXrefService;
+        this.movieRatingXrefService = movieRatingXrefService;
+        this.seriesGenreXrefService = seriesGenreXrefService;
+        this.seriesRatingXrefService = seriesRatingXrefService;
+        this.gameGenreXrefService = gameGenreXrefService;
+        this.gameRatingXrefService = gameRatingXrefService;
+    }
 
     public MovieResponse getMoviesData() {
         List<MovieEntity> movies =  movieRepository.findAll();

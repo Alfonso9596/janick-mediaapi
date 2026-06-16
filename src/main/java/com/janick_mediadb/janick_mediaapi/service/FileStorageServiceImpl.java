@@ -26,6 +26,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileStorageServiceImpl.class);
     public static final String POSTER_FILE_TYPE = ".jpg";
 
+    // TODO: Move resource paths to application context
     private final Path root = Paths.get("uploads");
     public static final Path movies = Paths.get("uploads/movies");
     private final Path series = Paths.get("uploads/series");
@@ -38,7 +39,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             Files.createDirectories(movies);
             Files.createDirectories(series);
             Files.createDirectories(games);
-        } catch (IOException e) {
+        } catch (IOException _) {
             throw new InternalServerException("Could not initialize folder for upload!");
         }
     }
@@ -53,9 +54,9 @@ public class FileStorageServiceImpl implements FileStorageService {
                 Files.createDirectories(path);
             }
             Files.copy(file.getInputStream(), path.resolve(title + POSTER_FILE_TYPE));
-        } catch (FileAlreadyExistsException e) {
+        } catch (FileAlreadyExistsException _) {
             throw new BadRequestException("A file with the name " + path + " already exists");
-        } catch (IOException e) {
+        } catch (IOException _) {
             throw new InternalServerException("Could not save file!");
         }
     }
@@ -88,7 +89,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     public Stream<Path> loadAll() {
         try {
             return Files.walk(this.root).filter(Files::isRegularFile);
-        } catch (IOException e) {
+        } catch (IOException _) {
             throw new InternalServerException("Could not load the files!");
         }
     }

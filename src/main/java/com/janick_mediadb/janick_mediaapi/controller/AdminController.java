@@ -19,8 +19,12 @@ import java.util.List;
 @RequestMapping("/api/admin")
 public class AdminController {
 
+    private final AdminService adminService;
+
     @Autowired
-    private AdminService adminService;
+    public AdminController(AdminService adminService) {
+        this.adminService = adminService;
+    }
 
     @GetMapping("/movies")
     public MovieResponse getMoviesData() {

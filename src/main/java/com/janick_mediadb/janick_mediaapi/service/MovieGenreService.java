@@ -27,14 +27,18 @@ public class MovieGenreService {
     private static final String GENRE_ID_NOT_EXIST = "Genre with id {0} does not exist";
     private static final String GENRE_ALREADY_REGISTERED = "The genre {0} is already registered";
 
-    @Autowired
-    private MovieGenreRepository movieGenreRepository;
+    private final MovieGenreRepository movieGenreRepository;
+
+    private final MovieGenreXrefService movieGenreXrefService;
+
+    private final SeriesGenreXrefService seriesGenreXrefService;
 
     @Autowired
-    private MovieGenreXrefService movieGenreXrefService;
-
-    @Autowired
-    private SeriesGenreXrefService seriesGenreXrefService;
+    public MovieGenreService(MovieGenreRepository movieGenreRepository, MovieGenreXrefService movieGenreXrefService, SeriesGenreXrefService seriesGenreXrefService) {
+        this.movieGenreRepository = movieGenreRepository;
+        this.movieGenreXrefService = movieGenreXrefService;
+        this.seriesGenreXrefService = seriesGenreXrefService;
+    }
 
     public List<MovieGenreModel> getAllGenres() {
         List<MovieGenreModel> genres = new ArrayList<>();

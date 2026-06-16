@@ -25,8 +25,12 @@ public class FileController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileController.class);
 
+    private final FileStorageService fileStorageService;
+
     @Autowired
-    private FileStorageService fileStorageService;
+    public FileController(FileStorageService fileStorageService) {
+        this.fileStorageService = fileStorageService;
+    }
 
     @PostMapping(value = "/api/files/uploadPoster", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadPoster(
