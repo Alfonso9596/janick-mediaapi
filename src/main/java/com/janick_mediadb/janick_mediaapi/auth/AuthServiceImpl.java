@@ -6,10 +6,12 @@ import com.janick_mediadb.janick_mediaapi.entity.security.RoleEntity;
 import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
 import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
 import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
+import com.janick_mediadb.janick_mediaapi.input.admin.UserInput;
 import com.janick_mediadb.janick_mediaapi.repository.RoleRepository;
 import com.janick_mediadb.janick_mediaapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -50,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<JWTAuthResponse> login(RegisterLoginModel loginModel) {
+    public ResponseEntity<JWTAuthResponse> login(LoginModel loginModel) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginModel.getUsername(), loginModel.getPassword()));
 
@@ -79,24 +81,24 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String register(RegisterLoginModel registerModel) {
-        if (Boolean.TRUE.equals(userRepository.existsByUsername(registerModel.getUsername()))) {
+    public ResponseEntity<String> register(UserInput userInput) {
+        if (Boolean.TRUE.equals(userRepository.existsByUsername(userInput.getUsername()))) {
             throw new BadRequestException("Username already exists!");
         }
 
         UsersEntity user = new UsersEntity();
-        user.setUsername(registerModel.getUsername());
-        user.setPassword(passwordEncoder.encode(registerModel.getPassword()));
+        user.setUsername(userInput.getUsername());
+        user.setPassword(passwordEncoder.encode(userInput.getPassword()));
         user.setEnabled(true);
 
         Set<RoleEntity> roles = new HashSet<>();
-        RoleEntity userRole = roleRepository.findByName(ERole.USER).orElseThrow(() -> new NotFoundException("Role with name " + ERole.USER + " not found!"));
+        RoleEntity userRole = roleRepository.findByName(ERole.USER.getValue()).orElseThrow(() -> new NotFoundException("Role with name " + ERole.USER + " not found!"));
         roles.add(userRole);
         user.setRoles(roles);
 
         userRepository.save(user);
 
-        return "User registered successfully";
+        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
     }
 
     @Override
@@ -131,7 +133,7 @@ public class AuthServiceImpl implements AuthService {
                                 refreshToken,
                                 user.getId(),
                                 user.getUsername(),
-                                user.getRoles().stream().map(r -> r.getName().name()).toList()
+                                user.getRoles().stream().map(RoleEntity::getName).toList()
                         ));
                     })
                     .orElseThrow(() -> new NotFoundException("Refresh token is not in database"));

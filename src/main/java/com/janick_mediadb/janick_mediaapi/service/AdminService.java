@@ -1,9 +1,14 @@
 package com.janick_mediadb.janick_mediaapi.service;
 
+import com.janick_mediadb.janick_mediaapi.auth.UserDetailsImpl;
 import com.janick_mediadb.janick_mediaapi.entity.GameEntity;
 import com.janick_mediadb.janick_mediaapi.entity.MovieEntity;
 import com.janick_mediadb.janick_mediaapi.entity.SeriesEntity;
+import com.janick_mediadb.janick_mediaapi.entity.security.RoleEntity;
 import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
+import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
+import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
+import com.janick_mediadb.janick_mediaapi.input.admin.UserInput;
 import com.janick_mediadb.janick_mediaapi.model.*;
 import com.janick_mediadb.janick_mediaapi.model.response.*;
 import com.janick_mediadb.janick_mediaapi.model.specifications.UserSpecification;
@@ -16,10 +21,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminService {
@@ -48,8 +58,10 @@ public class AdminService {
 
     private final GameRatingXrefService gameRatingXrefService;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
-    public AdminService(MovieRepository movieRepository, SeriesRepository seriesRepository, GameRepository gameRepository, UserRepository userRepository, RoleRepository roleRepository, MovieGenreXrefService movieGenreXrefService, MovieRatingXrefService movieRatingXrefService, SeriesGenreXrefService seriesGenreXrefService, SeriesRatingXrefService seriesRatingXrefService, GameGenreXrefService gameGenreXrefService, GameRatingXrefService gameRatingXrefService) {
+    public AdminService(MovieRepository movieRepository, SeriesRepository seriesRepository, GameRepository gameRepository, UserRepository userRepository, RoleRepository roleRepository, MovieGenreXrefService movieGenreXrefService, MovieRatingXrefService movieRatingXrefService, SeriesGenreXrefService seriesGenreXrefService, SeriesRatingXrefService seriesRatingXrefService, GameGenreXrefService gameGenreXrefService, GameRatingXrefService gameRatingXrefService, PasswordEncoder passwordEncoder) {
         this.movieRepository = movieRepository;
         this.seriesRepository = seriesRepository;
         this.gameRepository = gameRepository;
@@ -61,6 +73,71 @@ public class AdminService {
         this.seriesRatingXrefService = seriesRatingXrefService;
         this.gameGenreXrefService = gameGenreXrefService;
         this.gameRatingXrefService = gameRatingXrefService;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public ResponseEntity<String> createUser(UserInput userInput) {
+        if (Boolean.TRUE.equals(userRepository.existsByUsername(userInput.getUsername()))) {
+            throw new BadRequestException("Username already exists!");
+        }
+
+        UsersEntity user = new UsersEntity();
+        user.setUsername(userInput.getUsername());
+        user.setPassword(passwordEncoder.encode(userInput.getPassword()));
+        user.setEnabled(userInput.isEnabled());
+
+        Set<RoleEntity> roles = userInput.getRoles().stream().map(r -> roleRepository.findByName(r).orElseThrow(() -> new NotFoundException("Role with name " + r + " not found!"))).collect(Collectors.toSet());
+        user.setRoles(roles);
+
+        userRepository.save(user);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
+    }
+
+    public ResponseEntity<String> deleteUser(int id, UserDetailsImpl principal) {
+        if (!userRepository.existsById(id)) {
+            throw new BadRequestException("User with id " + id + " not found!");
+        }
+        if (principal.getId() == id) {
+            throw new BadRequestException("Can not delete your own user!");
+        }
+
+        LOGGER.info("DELETED ROLE REFERENCES");
+
+        userRepository.deleteById(id);
+        return ResponseEntity.status(HttpStatus.OK).body("User has been deleted successfully");
+    }
+
+    public ResponseEntity<String> updateUser(int id, UserInput userInput) {
+        UsersEntity usersEntity = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User with id " + id + " not found!"));
+        usersEntity = mapToEntity(usersEntity, userInput);
+        usersEntity.setId(id);
+
+        userRepository.save(usersEntity);
+
+        return ResponseEntity.ok().body("User has been updated successfully");
+    }
+
+    private UsersEntity mapToEntity(UsersEntity existingUser, UserInput userInput) {
+        UsersEntity user = new UsersEntity();
+
+        if (userInput.getUsername() != null &&  !userInput.getUsername().isEmpty()) {
+            user.setUsername(userInput.getUsername());
+        } else {
+            user.setUsername(existingUser.getUsername());
+        }
+        if (userInput.getPassword() != null && !userInput.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(userInput.getPassword()));
+        } else {
+            user.setPassword(existingUser.getPassword());
+        }
+
+        Set<RoleEntity> roles = userInput.getRoles().stream().map(r -> roleRepository.findByName(r).orElseThrow(() -> new NotFoundException("Role with name " + r + " not found!"))).collect(Collectors.toSet());
+        user.setRoles(roles);
+
+        user.setEnabled(userInput.isEnabled());
+
+        return user;
     }
 
     public MovieResponse getMoviesData() {

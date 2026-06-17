@@ -18,13 +18,12 @@ public class RoleEntity extends AbstractEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Enumerated(EnumType.STRING)
-    private ERole name;
+    private String name;
 
     public RoleModel toModel() {
         RoleModel model = new RoleModel();
         model.setId(id);
-        model.setName(name.name());
+        model.setName(name);
         return model;
     }
 }

@@ -1,12 +1,13 @@
 package com.janick_mediadb.janick_mediaapi.auth;
 
+import com.janick_mediadb.janick_mediaapi.input.admin.UserInput;
 import org.springframework.http.ResponseEntity;
 
 public interface AuthService {
 
-    ResponseEntity<JWTAuthResponse> login(RegisterLoginModel loginModel);
+    ResponseEntity<JWTAuthResponse> login(LoginModel loginModel);
 
-    String register(RegisterLoginModel registerModel);
+    ResponseEntity<String> register(UserInput userInput);
 
     ResponseEntity<String> logout(UserDetailsImpl principal);
 

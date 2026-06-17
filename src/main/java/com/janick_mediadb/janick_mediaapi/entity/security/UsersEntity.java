@@ -24,7 +24,7 @@ public class UsersEntity extends AbstractEntity {
     private String username;
     private String password;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(name = "users_roles_xref",
         joinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "ID"),
         inverseJoinColumns = @JoinColumn(name = "ROLE_ID", referencedColumnName = "ID"))
@@ -36,7 +36,7 @@ public class UsersEntity extends AbstractEntity {
         UserModel model = new UserModel();
         model.setId(id);
         model.setUsername(username);
-        model.setRoles(roles.stream().map(r -> r.getName().name()).toList());
+        model.setRoles(roles.stream().map(RoleEntity::getName).toList());
         model.setEnabled(isEnabled);
         return model;
     }

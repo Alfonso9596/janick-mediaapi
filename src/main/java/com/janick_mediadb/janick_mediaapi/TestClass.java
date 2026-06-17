@@ -1,7 +1,6 @@
 package com.janick_mediadb.janick_mediaapi;
 
 import com.janick_mediadb.janick_mediaapi.utils.NamingUtility;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
