@@ -1,6 +1,7 @@
 package com.janick_mediadb.janick_mediaapi.service;
 
 import com.janick_mediadb.janick_mediaapi.entity.GameEntity;
+import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
 import com.janick_mediadb.janick_mediaapi.entity.xref.GameRatingXrefEntity;
 import com.janick_mediadb.janick_mediaapi.model.GameModel;
 import com.janick_mediadb.janick_mediaapi.repository.xref.GameRatingXrefRepository;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class GameRatingXrefService {
@@ -35,6 +37,10 @@ public class GameRatingXrefService {
         }
     }
 
+    public Optional<GameRatingXrefEntity> findByGameIdAndUser(int gameId, int userId) {
+        return gameRatingXrefRepository.findByGameIdAndUserId(gameId, userId);
+    }
+
     public void deleteGameRatingReferenceByGameId(int gameId) {
         List<GameRatingXrefEntity> ratings = gameRatingXrefRepository.findAllByGameId(gameId);
         if (!ratings.isEmpty()) {
@@ -42,12 +48,18 @@ public class GameRatingXrefService {
         }
     }
 
-    public void addRating(GameEntity game, int rating) {
+    public GameRatingXrefEntity addRating(GameEntity game, UsersEntity user, int rating) {
         GameRatingXrefEntity gameRatingXrefEntity = new GameRatingXrefEntity();
         gameRatingXrefEntity.setGame(game);
+        gameRatingXrefEntity.setUser(user);
         gameRatingXrefEntity.setRating(rating);
 
         LOGGER.info("addRating: Saving game rating {} for {}", rating, game.getName());
-        gameRatingXrefRepository.save(gameRatingXrefEntity);
+        return gameRatingXrefRepository.save(gameRatingXrefEntity);
+    }
+
+    public GameRatingXrefEntity updateRating(GameRatingXrefEntity gameRating, int rating) {
+        gameRating.setRating(rating);
+        return gameRatingXrefRepository.save(gameRating);
     }
 }

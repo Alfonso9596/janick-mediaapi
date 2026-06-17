@@ -1,18 +1,27 @@
 package com.janick_mediadb.janick_mediaapi.service;
 
 import com.janick_mediadb.janick_mediaapi.auth.UserDetailsImpl;
+import com.janick_mediadb.janick_mediaapi.controller.FileController;
 import com.janick_mediadb.janick_mediaapi.entity.GameEntity;
 import com.janick_mediadb.janick_mediaapi.entity.GameGenreEntity;
+import com.janick_mediadb.janick_mediaapi.entity.GamePlatformEntity;
 import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
+import com.janick_mediadb.janick_mediaapi.entity.xref.GameRatingXrefEntity;
+import com.janick_mediadb.janick_mediaapi.enums.DownloadFileType;
 import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
+import com.janick_mediadb.janick_mediaapi.exception.InternalServerException;
 import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
 import com.janick_mediadb.janick_mediaapi.input.GameInput;
+import com.janick_mediadb.janick_mediaapi.input.GamePlatformInput;
 import com.janick_mediadb.janick_mediaapi.input.MovieGenreInput;
+import com.janick_mediadb.janick_mediaapi.model.FileInfoModel;
 import com.janick_mediadb.janick_mediaapi.model.GameModel;
+import com.janick_mediadb.janick_mediaapi.model.RatingUpdateModel;
 import com.janick_mediadb.janick_mediaapi.model.response.GameResponse;
 import com.janick_mediadb.janick_mediaapi.model.response.GameSearchCriteria;
 import com.janick_mediadb.janick_mediaapi.model.specifications.GameSpecification;
 import com.janick_mediadb.janick_mediaapi.repository.GameRepository;
+import com.janick_mediadb.janick_mediaapi.utils.FileUtility;
 import com.janick_mediadb.janick_mediaapi.utils.NamingUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +31,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -45,16 +61,22 @@ public class GameService {
 
     private final GameRatingXrefService gameRatingXrefService;
 
+    private final GamePlatformXrefService gamePlatformXrefService;
+
     private final GameGenreService genreService;
+
+    private final GamePlatformService gamePlatformService;
 
     private final UserService userService;
 
     @Autowired
-    public GameService(GameRepository gameRepository, GameGenreXrefService gameGenreXrefService, GameRatingXrefService gameRatingXrefService, GameGenreService gameGenreService, UserService userService) {
+    public GameService(GameRepository gameRepository, GameGenreXrefService gameGenreXrefService, GameRatingXrefService gameRatingXrefService, GamePlatformXrefService gamePlatformXrefService, GameGenreService gameGenreService, GamePlatformService gamePlatformService, UserService userService) {
         this.gameRepository = gameRepository;
         this.gameGenreXrefService = gameGenreXrefService;
         this.gameRatingXrefService = gameRatingXrefService;
+        this.gamePlatformXrefService = gamePlatformXrefService;
         this.genreService = gameGenreService;
+        this.gamePlatformService = gamePlatformService;
         this.userService = userService;
     }
 
@@ -71,6 +93,7 @@ public class GameService {
         List<GameModel> content = listOfGames.stream().map(g -> {
             GameModel model = g.toModel();
             gameGenreXrefService.collectGenres(g.getId(), model);
+            gamePlatformXrefService.collectPlatforms(g.getId(), model);
             gameRatingXrefService.collectRatings(g.getId(), model);
             return model;
         }).toList();
@@ -98,6 +121,7 @@ public class GameService {
             LOGGER.info("getGameById: Found game with id {}", id);
             GameModel model = opGame.get().toModel();
             gameGenreXrefService.collectGenres(model.getId(), model);
+            gamePlatformXrefService.collectPlatforms(model.getId(), model);
             gameRatingXrefService.collectRatings(model.getId(), model);
             return model;
         } else {
@@ -138,6 +162,24 @@ public class GameService {
             }
         }
 
+        List<GamePlatformEntity>  platformEntities = new ArrayList<>();
+        if (!gameInput.getPlatforms().isEmpty()) {
+            for (String platform : gameInput.getPlatforms()) {
+                GamePlatformInput input = new GamePlatformInput();
+                input.setName(platform);
+                try {
+                    gamePlatformService.savePlatform(input);
+                } catch (BadRequestException _) {
+                    LOGGER.warn("Platform {} already exists", platform);
+                }
+            }
+
+            for (String platform : gameInput.getPlatforms()) {
+                GamePlatformEntity platformEntity = gamePlatformService.getPlatformByName(platform);
+                platformEntities.add(platformEntity);
+            }
+        }
+
         GameEntity gameEntity = new GameEntity();
         gameEntity.fromInput(gameInput);
 
@@ -158,6 +200,7 @@ public class GameService {
         gameEntity = gameRepository.save(gameEntity);
         LOGGER.info("saveGame: Saving game {}", gameEntity.toModel());
         gameGenreXrefService.saveGameGenreXref(gameEntity, genreEntities);
+        gamePlatformXrefService.saveGamePlatformXref(gameEntity, platformEntities);
 
         return gameEntity.toModel();
     }
@@ -179,7 +222,30 @@ public class GameService {
         return MessageFormat.format("The game {0} has been deleted", gameEntity.getName());
     }
 
-    public String rateGame(int id, int rating) {
+    public String rateGame(RatingUpdateModel ratingUpdateModel) {
+        Optional<GameEntity> opGame = gameRepository.findById(ratingUpdateModel.getId());
+        if (opGame.isEmpty()) {
+            String message = MessageFormat.format(GAME_WITH_ID_DOES_NOT_EXIST, ratingUpdateModel.getId());
+            LOGGER.error(message);
+            throw new NotFoundException(message);
+        }
+
+        GameEntity gameEntity = opGame.get();
+        UserDetailsImpl userDeatils = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Optional<GameRatingXrefEntity> existingRating = gameRatingXrefService.findByGameIdAndUser(gameEntity.getId(), userDeatils.getId());
+        UsersEntity user = userService.getUserByUsername(userDeatils.getUsername());
+
+        if (existingRating.isEmpty()) {
+            gameRatingXrefService.addRating(gameEntity, user, ratingUpdateModel.getRating());
+        } else {
+            gameRatingXrefService.updateRating(existingRating.get(), ratingUpdateModel.getRating());
+        }
+
+        return MessageFormat.format("{0} has been rated with {1}", gameEntity.getName(), ratingUpdateModel.getRating());
+    }
+
+    public ResponseEntity<List<FileInfoModel>> getGameFiles(int id) {
         Optional<GameEntity> opGame = gameRepository.findById(id);
         if (opGame.isEmpty()) {
             String message = MessageFormat.format(GAME_WITH_ID_DOES_NOT_EXIST, id);
@@ -187,8 +253,19 @@ public class GameService {
             throw new NotFoundException(message);
         }
         GameEntity gameEntity = opGame.get();
-        gameRatingXrefService.addRating(gameEntity, rating);
-        return MessageFormat.format("{0} has been rated with {1}", gameEntity.getName(), rating);
+        String fileStorageName = NamingUtility.renameTitleForFilepath(gameEntity.getName()) + "_" + gameEntity.getYear();
+        Path filePath = FileStorageServiceImpl.games.resolve(fileStorageName).resolve("files");
+
+        try {
+            if (!Files.exists(filePath)) {
+                Files.createDirectories(filePath);
+            }
+        } catch (IOException e) {
+            throw new InternalServerException("Could not create directory " + filePath, e);
+        }
+        List<FileInfoModel> fileInfoModels = FileUtility.getDirList(filePath.toFile());
+
+        return ResponseEntity.status(HttpStatus.OK).body(fileInfoModels);
     }
 
     private List<GameEntity> getAllGameEntities() {

@@ -1,7 +1,9 @@
 package com.janick_mediadb.janick_mediaapi.controller;
 
 import com.janick_mediadb.janick_mediaapi.input.GameInput;
+import com.janick_mediadb.janick_mediaapi.model.FileInfoModel;
 import com.janick_mediadb.janick_mediaapi.model.GameModel;
+import com.janick_mediadb.janick_mediaapi.model.RatingUpdateModel;
 import com.janick_mediadb.janick_mediaapi.model.response.GameResponse;
 import com.janick_mediadb.janick_mediaapi.model.response.GameSearchCriteria;
 import com.janick_mediadb.janick_mediaapi.service.GameService;
@@ -12,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/games")
@@ -61,12 +65,15 @@ public class GameController {
                 .body(gameModel);
     }
 
-    @PostMapping("/{id}/rate")
-    public ResponseEntity<String> rateGame(
-            @PathVariable("id") int id,
-            @RequestParam("rating") int rating) {
+    @PostMapping("/rating")
+    public ResponseEntity<String> rateGame(@RequestBody RatingUpdateModel ratingUpdateModel) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(gameService.rateGame(id, rating));
+                .body(gameService.rateGame(ratingUpdateModel));
+    }
+
+    @GetMapping("/{id}/files")
+    public ResponseEntity<List<FileInfoModel>> getGameFiles(@PathVariable("id") int id) {
+        return gameService.getGameFiles(id);
     }
 }

@@ -14,4 +14,5 @@ public class GameInput extends AbstractModel {
     private String description;
     private String year;
     private List<String> genres;
+    private List<String> platforms;
 }

@@ -34,12 +34,7 @@ public class GamePlatformEntity extends AbstractEntity {
         return model;
     }
 
-    public static List<GamePlatformModel> toModels(List<GamePlatformEntity> platforms) {
-        List<GamePlatformModel> models = new ArrayList<>();
-        for (GamePlatformEntity platform : platforms) {
-            models.add(platform.toModel());
-        }
-
-        return models;
+    public static List<String> toModels(List<GamePlatformEntity> platforms) {
+        return platforms.stream().map(GamePlatformEntity::getName).toList();
     }
 }

@@ -515,6 +515,11 @@ INSERT INTO game_platform (ID, NAME) VALUES (7, 'GB');
 INSERT INTO game_platform (ID, NAME) VALUES (8, 'GBA');
 INSERT INTO game_platform (ID, NAME) VALUES (9, 'GBC');
 INSERT INTO game_platform (ID, NAME) VALUES (10, 'SNES');
+INSERT INTO game_platform (ID, NAME) VALUES (11, 'Switch');
+INSERT INTO game_platform (ID, NAME) VALUES (12, 'Switch 2');
+INSERT INTO game_platform (ID, NAME) VALUES (13, 'XBOX360');
+INSERT INTO game_platform (ID, NAME) VALUES (14, 'XBOX One');
+INSERT INTO game_platform (ID, NAME) VALUES (15, 'XBOX X/S');
 
 --
 -- Initial values for table game_platform_xref
@@ -522,4 +527,24 @@ INSERT INTO game_platform (ID, NAME) VALUES (10, 'SNES');
 INSERT INTO game_platform_xref (GAME_ID, PLATFORM_ID) VALUES (
     (SELECT ID FROM game WHERE NAME = 'Elden Ring'),
     1
+);
+INSERT INTO game_platform_xref (GAME_ID, PLATFORM_ID) VALUES (
+    (SELECT ID FROM game WHERE NAME = 'Elden Ring'),
+    2
+);
+INSERT INTO game_platform_xref (GAME_ID, PLATFORM_ID) VALUES (
+    (SELECT ID FROM game WHERE NAME = 'Elden Ring'),
+    3
+);
+INSERT INTO game_platform_xref (GAME_ID, PLATFORM_ID) VALUES (
+    (SELECT ID FROM game WHERE NAME = 'Elden Ring'),
+    12
+);
+INSERT INTO game_platform_xref (GAME_ID, PLATFORM_ID) VALUES (
+    (SELECT ID FROM game WHERE NAME = 'Elden Ring'),
+    14
+);
+INSERT INTO game_platform_xref (GAME_ID, PLATFORM_ID) VALUES (
+    (SELECT ID FROM game WHERE NAME = 'Elden Ring'),
+    15
 );

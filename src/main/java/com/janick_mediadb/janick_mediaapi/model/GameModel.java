@@ -26,6 +26,8 @@ public class GameModel extends AbstractModel {
 
     private List<String> genres;
 
+    private List<String> platforms;
+
     private Date createdAt;
 
     private Date lastUpdated;

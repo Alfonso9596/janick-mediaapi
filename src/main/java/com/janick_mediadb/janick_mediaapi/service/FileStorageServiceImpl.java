@@ -29,8 +29,8 @@ public class FileStorageServiceImpl implements FileStorageService {
     // TODO: Move resource paths to application context
     private final Path root = Paths.get("uploads");
     public static final Path movies = Paths.get("uploads/movies");
-    private final Path series = Paths.get("uploads/series");
-    private final Path games = Paths.get("uploads/games");
+    public static final Path series = Paths.get("uploads/series");
+    public static final Path games = Paths.get("uploads/games");
 
     @Override
     public void init() {

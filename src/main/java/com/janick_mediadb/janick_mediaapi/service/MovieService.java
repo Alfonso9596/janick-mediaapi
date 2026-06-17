@@ -19,6 +19,7 @@ import com.janick_mediadb.janick_mediaapi.model.response.MovieResponse;
 import com.janick_mediadb.janick_mediaapi.model.response.MovieSearchCriteria;
 import com.janick_mediadb.janick_mediaapi.model.specifications.MovieSpecification;
 import com.janick_mediadb.janick_mediaapi.repository.MovieRepository;
+import com.janick_mediadb.janick_mediaapi.utils.FileUtility;
 import com.janick_mediadb.janick_mediaapi.utils.NamingUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -233,44 +234,9 @@ public class MovieService {
         } catch (IOException e) {
             throw new InternalServerException("Could not create directory " + filePath, e);
         }
-        List<FileInfoModel> fileInfoModels = getDirList(filePath.toFile());
+        List<FileInfoModel> fileInfoModels = FileUtility.getDirList(filePath.toFile());
 
         return ResponseEntity.status(HttpStatus.OK).body(fileInfoModels);
-    }
-
-    private FileInfoModel getNode(File node) {
-        FileInfoModel fileInfoModel = new FileInfoModel();
-        fileInfoModel.setName(node.getName());
-        if (node.isDirectory()) {
-            fileInfoModel.setFileType(DownloadFileType.FOLDER);
-
-            List<FileInfoModel> childrenInfoModels = getDirList(node);
-            fileInfoModel.setChildren(childrenInfoModels);
-        } else {
-            String relativePath = node.toPath().toString().replace("uploads\\", "");
-            String url = MvcUriComponentsBuilder.fromMethodName(FileController.class, "getFile", relativePath).build().toString();
-
-            fileInfoModel.setUrl(url.replace("\\", "/"));
-            fileInfoModel.setSize(node.length());
-
-            String fileExtension = getFileExtension(node.getName());
-            switch (fileExtension) {
-                case "zip", "rar", "7z", "tar":
-                    fileInfoModel.setFileType(DownloadFileType.ZIP);
-                    break;
-                default:
-                    fileInfoModel.setFileType(DownloadFileType.VIDEO);
-            }
-        }
-        return fileInfoModel;
-    }
-
-    private List<FileInfoModel> getDirList(File node) {
-        List<FileInfoModel> fileInfoModels = new ArrayList<>();
-        for (File file : node.listFiles()) {
-            fileInfoModels.add(getNode(file));
-        }
-        return fileInfoModels;
     }
 
     private List<MovieEntity> getAllMovieEntities() {
@@ -293,16 +259,5 @@ public class MovieService {
         }
 
         return spec;
-    }
-
-    private String getFileExtension(String filename) {
-        if (filename == null) {
-            return null;
-        }
-        int dotIndex = filename.lastIndexOf('.');
-        if (dotIndex >= 0) {
-            return filename.substring(dotIndex + 1);
-        }
-        return null;
     }
 }

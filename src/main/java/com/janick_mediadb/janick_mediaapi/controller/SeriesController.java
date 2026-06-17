@@ -1,6 +1,8 @@
 package com.janick_mediadb.janick_mediaapi.controller;
 
 import com.janick_mediadb.janick_mediaapi.input.SeriesInput;
+import com.janick_mediadb.janick_mediaapi.model.FileInfoModel;
+import com.janick_mediadb.janick_mediaapi.model.RatingUpdateModel;
 import com.janick_mediadb.janick_mediaapi.model.SeriesModel;
 import com.janick_mediadb.janick_mediaapi.model.response.SeriesResponse;
 import com.janick_mediadb.janick_mediaapi.model.response.SeriesSearchCriteria;
@@ -12,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/series")
@@ -61,13 +65,16 @@ public class SeriesController {
                 .body(seriesModel);
     }
 
-    @PostMapping("/{id}/rate")
-    public ResponseEntity<String> rateMovie(
-            @PathVariable("id") int id,
-            @RequestParam("rating") int rating) {
+    @PostMapping("/rating")
+    public ResponseEntity<String> rateMovie(@RequestBody RatingUpdateModel ratingUpdateModel) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(seriesService.rateSeries(id, rating));
+                .body(seriesService.rateSeries(ratingUpdateModel));
+    }
+
+    @GetMapping("/{id}/files")
+    public ResponseEntity<List<FileInfoModel>> getSeriesFiles(@PathVariable("id") int id) {
+        return seriesService.getSeriesFiles(id);
     }
 
 }

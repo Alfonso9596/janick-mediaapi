@@ -4,15 +4,20 @@ import com.janick_mediadb.janick_mediaapi.auth.UserDetailsImpl;
 import com.janick_mediadb.janick_mediaapi.entity.MovieGenreEntity;
 import com.janick_mediadb.janick_mediaapi.entity.SeriesEntity;
 import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
+import com.janick_mediadb.janick_mediaapi.entity.xref.SeriesRatingXrefEntity;
 import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
+import com.janick_mediadb.janick_mediaapi.exception.InternalServerException;
 import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
 import com.janick_mediadb.janick_mediaapi.input.MovieGenreInput;
 import com.janick_mediadb.janick_mediaapi.input.SeriesInput;
+import com.janick_mediadb.janick_mediaapi.model.FileInfoModel;
+import com.janick_mediadb.janick_mediaapi.model.RatingUpdateModel;
 import com.janick_mediadb.janick_mediaapi.model.SeriesModel;
 import com.janick_mediadb.janick_mediaapi.model.response.SeriesResponse;
 import com.janick_mediadb.janick_mediaapi.model.response.SeriesSearchCriteria;
 import com.janick_mediadb.janick_mediaapi.model.specifications.SeriesSpecification;
 import com.janick_mediadb.janick_mediaapi.repository.SeriesRepository;
+import com.janick_mediadb.janick_mediaapi.utils.FileUtility;
 import com.janick_mediadb.janick_mediaapi.utils.NamingUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +27,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -179,7 +189,29 @@ public class SeriesService {
         return MessageFormat.format("The series {0} has been deleted", seriesEntity.getName());
     }
 
-    public String rateSeries(int id, int rating) {
+    public String rateSeries(RatingUpdateModel ratingUpdateModel) {
+        Optional<SeriesEntity> opSeries = seriesRepository.findById(ratingUpdateModel.getId());
+        if (opSeries.isEmpty()) {
+            String message = MessageFormat.format(SERIES_WITH_ID_DOES_NOT_EXIST, ratingUpdateModel.getId());
+            LOGGER.error(message);
+            throw new NotFoundException(message);
+        }
+        SeriesEntity seriesEntity = opSeries.get();
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Optional<SeriesRatingXrefEntity> existingRating = seriesRatingXrefService.findBySeriesIdAndUser(seriesEntity.getId(), userDetails.getId());
+        UsersEntity user = userService.getUserByUsername(userDetails.getUsername());
+
+        if (existingRating.isEmpty()) {
+            seriesRatingXrefService.addRating(seriesEntity, user, ratingUpdateModel.getRating());
+        } else {
+            seriesRatingXrefService.updateRating(existingRating.get(), ratingUpdateModel.getRating());
+        }
+
+        return MessageFormat.format("{0} has been rated with {1}", seriesEntity.getName(), ratingUpdateModel.getRating());
+    }
+
+    public ResponseEntity<List<FileInfoModel>> getSeriesFiles(int id) {
         Optional<SeriesEntity> opSeries = seriesRepository.findById(id);
         if (opSeries.isEmpty()) {
             String message = MessageFormat.format(SERIES_WITH_ID_DOES_NOT_EXIST, id);
@@ -187,8 +219,19 @@ public class SeriesService {
             throw new NotFoundException(message);
         }
         SeriesEntity seriesEntity = opSeries.get();
-        seriesRatingXrefService.addRating(seriesEntity, rating);
-        return MessageFormat.format("{0} has been rated with {1}", seriesEntity.getName(), rating);
+        String fileStorageName = NamingUtility.renameTitleForFilepath(seriesEntity.getName()) + "_" + seriesEntity.getYearStart();
+        Path filePath = FileStorageServiceImpl.series.resolve(fileStorageName).resolve("files");
+
+        try {
+            if (!Files.exists(filePath)) {
+                Files.createDirectories(filePath);
+            }
+        } catch (IOException e) {
+            throw new InternalServerException("Could not create directory " + filePath, e);
+        }
+        List<FileInfoModel> fileInfoModels = FileUtility.getDirList(filePath.toFile());
+
+        return ResponseEntity.status(HttpStatus.OK).body(fileInfoModels);
     }
 
     private List<SeriesEntity> getAllSeriesEntities() {
