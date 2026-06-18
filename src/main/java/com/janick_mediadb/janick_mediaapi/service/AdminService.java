@@ -1,5 +1,6 @@
 package com.janick_mediadb.janick_mediaapi.service;
 
+import com.janick_mediadb.janick_mediaapi.auth.RefreshTokenService;
 import com.janick_mediadb.janick_mediaapi.auth.UserDetailsImpl;
 import com.janick_mediadb.janick_mediaapi.entity.GameEntity;
 import com.janick_mediadb.janick_mediaapi.entity.MovieEntity;
@@ -58,10 +59,12 @@ public class AdminService {
 
     private final GameRatingXrefService gameRatingXrefService;
 
+    private final RefreshTokenService refreshTokenService;
+
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AdminService(MovieRepository movieRepository, SeriesRepository seriesRepository, GameRepository gameRepository, UserRepository userRepository, RoleRepository roleRepository, MovieGenreXrefService movieGenreXrefService, MovieRatingXrefService movieRatingXrefService, SeriesGenreXrefService seriesGenreXrefService, SeriesRatingXrefService seriesRatingXrefService, GameGenreXrefService gameGenreXrefService, GameRatingXrefService gameRatingXrefService, PasswordEncoder passwordEncoder) {
+    public AdminService(MovieRepository movieRepository, SeriesRepository seriesRepository, GameRepository gameRepository, UserRepository userRepository, RoleRepository roleRepository, MovieGenreXrefService movieGenreXrefService, MovieRatingXrefService movieRatingXrefService, SeriesGenreXrefService seriesGenreXrefService, SeriesRatingXrefService seriesRatingXrefService, GameGenreXrefService gameGenreXrefService, GameRatingXrefService gameRatingXrefService, RefreshTokenService refreshTokenService, PasswordEncoder passwordEncoder) {
         this.movieRepository = movieRepository;
         this.seriesRepository = seriesRepository;
         this.gameRepository = gameRepository;
@@ -73,6 +76,7 @@ public class AdminService {
         this.seriesRatingXrefService = seriesRatingXrefService;
         this.gameGenreXrefService = gameGenreXrefService;
         this.gameRatingXrefService = gameRatingXrefService;
+        this.refreshTokenService = refreshTokenService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -102,8 +106,7 @@ public class AdminService {
             throw new BadRequestException("Can not delete your own user!");
         }
 
-        LOGGER.info("DELETED ROLE REFERENCES");
-
+        refreshTokenService.deleteByUserId(id);
         userRepository.deleteById(id);
         return ResponseEntity.status(HttpStatus.OK).body("User has been deleted successfully");
     }
@@ -121,7 +124,7 @@ public class AdminService {
     private UsersEntity mapToEntity(UsersEntity existingUser, UserInput userInput) {
         UsersEntity user = new UsersEntity();
 
-        if (userInput.getUsername() != null &&  !userInput.getUsername().isEmpty()) {
+        if (userInput.getUsername() != null && !userInput.getUsername().isEmpty()) {
             user.setUsername(userInput.getUsername());
         } else {
             user.setUsername(existingUser.getUsername());

@@ -13,6 +13,6 @@ public class MovieInput extends AbstractModel {
     private String name;
     private String description;
     private String year;
-    private int length;
+    private Integer length;
     private List<String> genres;
 }

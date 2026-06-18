@@ -66,6 +66,18 @@ public class MovieController {
                 .body(movieModel);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<MovieModel> updateMovie(
+            @PathVariable("id") int id,
+            @RequestBody MovieInput movieInput) {
+
+        MovieModel movieModel = movieService.updateMovie(id, movieInput);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(movieModel);
+    }
+
     @PostMapping("/rating")
     public ResponseEntity<String> rateMovie(@RequestBody RatingUpdateModel ratingUpdateModel) {
         return ResponseEntity

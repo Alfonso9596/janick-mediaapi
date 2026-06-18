@@ -1,15 +1,14 @@
 package com.janick_mediadb.janick_mediaapi.service;
 
 import com.janick_mediadb.janick_mediaapi.auth.UserDetailsImpl;
-import com.janick_mediadb.janick_mediaapi.controller.FileController;
 import com.janick_mediadb.janick_mediaapi.entity.MovieGenreEntity;
 import com.janick_mediadb.janick_mediaapi.entity.MovieEntity;
 import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
 import com.janick_mediadb.janick_mediaapi.entity.xref.MovieRatingXrefEntity;
-import com.janick_mediadb.janick_mediaapi.enums.DownloadFileType;
 import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
 import com.janick_mediadb.janick_mediaapi.exception.InternalServerException;
 import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
+import com.janick_mediadb.janick_mediaapi.exception.UnauthorizedException;
 import com.janick_mediadb.janick_mediaapi.input.MovieGenreInput;
 import com.janick_mediadb.janick_mediaapi.input.MovieInput;
 import com.janick_mediadb.janick_mediaapi.model.FileInfoModel;
@@ -33,9 +32,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -174,6 +171,60 @@ public class MovieService {
         movieGenreXrefService.saveMovieGenreXref(movieEntity, genreEntities);
 
         return movieEntity.toModel();
+    }
+
+    public MovieModel updateMovie(int id, MovieInput movieInput) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UsersEntity user = userService.getUserByUsername(userDetails.getUsername());
+
+        MovieEntity movieEntity = movieRepository.findById(id).orElseThrow(() -> new NotFoundException("Movie with id " + id + " not found!"));
+
+        if (movieEntity.getUser().getId() != user.getId() && user.getRoles().stream().noneMatch(role -> role.getName().equals("ADMIN"))) {
+            throw new UnauthorizedException("User " + user.getUsername() + " is not allowed to update movie with id " + id);
+        }
+
+        List<MovieGenreEntity> genreEntities = new ArrayList<>();
+        if (!movieInput.getGenres().isEmpty()) {
+            for (String genre : movieInput.getGenres()) {
+                MovieGenreInput input = new MovieGenreInput();
+                input.setName(genre);
+                try {
+                    genreService.saveGenre(input);
+                } catch (BadRequestException _) {
+                    LOGGER.warn("Genre {} already exists", genre);
+                }
+            }
+
+            for (String genre : movieInput.getGenres()) {
+                MovieGenreEntity movieGenreEntity = genreService.getGenreByName(genre);
+                genreEntities.add(movieGenreEntity);
+            }
+        }
+        movieGenreXrefService.deleteMovieGenreReferenceByMovieId(id);
+        mapToEntity(movieEntity, movieInput);
+
+        Instant currentTime = Instant.now();
+        movieEntity.setLastUpdated(currentTime);
+        movieEntity = movieRepository.save(movieEntity);
+        LOGGER.info("updateMovie: Updating movie {}", movieEntity.toModel());
+        movieGenreXrefService.saveMovieGenreXref(movieEntity, genreEntities);
+
+        return movieEntity.toModel();
+    }
+
+    private void mapToEntity(MovieEntity existingMovie, MovieInput movieInput) {
+        if (movieInput.getName() != null && !movieInput.getName().isEmpty()) {
+            existingMovie.setName(movieInput.getName());
+        }
+        if (movieInput.getYear() != null && !movieInput.getYear().isEmpty()) {
+            existingMovie.setYear(movieInput.getYear());
+        }
+        if (movieInput.getDescription() != null && !movieInput.getDescription().isEmpty()) {
+            existingMovie.setDescription(movieInput.getDescription());
+        }
+        if (movieInput.getLength() != null) {
+            existingMovie.setLength(movieInput.getLength());
+        }
     }
 
     public String deleteMovie(int id) {
