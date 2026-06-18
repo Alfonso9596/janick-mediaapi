@@ -17,8 +17,7 @@ public class TestClass {
     private static PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public static void main(String[] args) {
-        //testNamingUtility("Der Herr der Ringe: Die Rückkehr des Königs");
-        System.out.println(Instant.now());
+        testNamingUtility("Avatar - Der Herr der Elemente");
     }
 
     private static void testNamingUtility(String title) {

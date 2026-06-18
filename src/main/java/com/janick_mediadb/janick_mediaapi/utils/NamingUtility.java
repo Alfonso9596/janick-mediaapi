@@ -7,6 +7,6 @@ public class NamingUtility {
     }
 
     public static String renameTitleForFilepath(String title) {
-        return title.toLowerCase().replace(":", "").replace(" ", "_");
+        return title.toLowerCase().replace(":", "").replace(" - ", "_").replace("-", " ").replace(" ", "_");
     }
 }
