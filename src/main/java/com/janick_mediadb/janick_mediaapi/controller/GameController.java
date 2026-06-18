@@ -65,6 +65,18 @@ public class GameController {
                 .body(gameModel);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<GameModel> updateGame(
+            @PathVariable("id") int id,
+            @RequestBody GameInput gameInput) {
+
+        GameModel gameModel = gameService.updateGame(id, gameInput);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(gameModel);
+    }
+
     @PostMapping("/rating")
     public ResponseEntity<String> rateGame(@RequestBody RatingUpdateModel ratingUpdateModel) {
         return ResponseEntity

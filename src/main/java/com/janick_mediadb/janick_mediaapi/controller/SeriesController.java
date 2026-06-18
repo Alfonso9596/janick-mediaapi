@@ -65,6 +65,18 @@ public class SeriesController {
                 .body(seriesModel);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<SeriesModel> updateSeries(
+            @PathVariable("id") int id,
+            @RequestBody SeriesInput seriesInput) {
+
+        SeriesModel seriesModel = seriesService.updateSeries(id, seriesInput);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(seriesModel);
+    }
+
     @PostMapping("/rating")
     public ResponseEntity<String> rateMovie(@RequestBody RatingUpdateModel ratingUpdateModel) {
         return ResponseEntity

@@ -1,16 +1,15 @@
 package com.janick_mediadb.janick_mediaapi.service;
 
 import com.janick_mediadb.janick_mediaapi.auth.UserDetailsImpl;
-import com.janick_mediadb.janick_mediaapi.controller.FileController;
 import com.janick_mediadb.janick_mediaapi.entity.GameEntity;
 import com.janick_mediadb.janick_mediaapi.entity.GameGenreEntity;
 import com.janick_mediadb.janick_mediaapi.entity.GamePlatformEntity;
 import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
 import com.janick_mediadb.janick_mediaapi.entity.xref.GameRatingXrefEntity;
-import com.janick_mediadb.janick_mediaapi.enums.DownloadFileType;
 import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
 import com.janick_mediadb.janick_mediaapi.exception.InternalServerException;
 import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
+import com.janick_mediadb.janick_mediaapi.exception.UnauthorizedException;
 import com.janick_mediadb.janick_mediaapi.input.GameInput;
 import com.janick_mediadb.janick_mediaapi.input.GamePlatformInput;
 import com.janick_mediadb.janick_mediaapi.input.MovieGenreInput;
@@ -35,9 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -203,6 +200,78 @@ public class GameService {
         gamePlatformXrefService.saveGamePlatformXref(gameEntity, platformEntities);
 
         return gameEntity.toModel();
+    }
+
+    public GameModel updateGame(int id, GameInput gameInput) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UsersEntity user = userService.getUserByUsername(userDetails.getUsername());
+
+        GameEntity gameEntity = gameRepository.findById(id).orElseThrow(() -> new NotFoundException("Game with id " + id + " not found!"));;
+
+        if (gameEntity.getUser().getId() != user.getId() && user.getRoles().stream().noneMatch(role -> role.getName().equals("ADMIN"))) {
+            throw new UnauthorizedException("User " + user.getUsername() + " is not allowed to update game with id " + id);
+        }
+
+        List<GameGenreEntity> genreEntities = new ArrayList<>();
+        if (!gameInput.getGenres().isEmpty()) {
+            for (String genre : gameInput.getGenres()) {
+                MovieGenreInput input = new MovieGenreInput();
+                input.setName(genre);
+                try {
+                    genreService.saveGenre(input);
+                } catch (BadRequestException _) {
+                    LOGGER.warn("Genre {} already exists", genre);
+                }
+            }
+
+            for (String genre : gameInput.getGenres()) {
+                GameGenreEntity gameGenreEntity = genreService.getGenreByName(genre);
+                genreEntities.add(gameGenreEntity);
+            }
+        }
+
+        List<GamePlatformEntity> platformEntities = new ArrayList<>();
+        if (!gameInput.getPlatforms().isEmpty()) {
+            for (String platform : gameInput.getPlatforms()) {
+                GamePlatformInput input = new GamePlatformInput();
+                input.setName(platform);
+                try {
+                    gamePlatformService.savePlatform(input);
+                } catch (BadRequestException _) {
+                    LOGGER.warn("Platform {} already exists", platform);
+                }
+            }
+
+            for (String platform : gameInput.getPlatforms()) {
+                GamePlatformEntity platformEntity = gamePlatformService.getPlatformByName(platform);
+                platformEntities.add(platformEntity);
+            }
+        }
+
+        gameGenreXrefService.deleteGameGenreReferenceByGameId(id);
+        gamePlatformXrefService.deleteGamePlatformReferenceByGameId(id);
+        mapToEntity(gameEntity, gameInput);
+
+        Instant currentTime = Instant.now();
+        gameEntity.setLastUpdated(currentTime);
+        gameEntity = gameRepository.save(gameEntity);
+        LOGGER.info("updateGame: Updating game {}", gameEntity.toModel());
+        gameGenreXrefService.saveGameGenreXref(gameEntity, genreEntities);
+        gamePlatformXrefService.saveGamePlatformXref(gameEntity, platformEntities);
+
+        return gameEntity.toModel();
+    }
+
+    private void mapToEntity(GameEntity existingGame, GameInput gameInput) {
+        if (gameInput.getName() != null && !gameInput.getName().isEmpty()) {
+            existingGame.setName(gameInput.getName());
+        }
+        if (gameInput.getYear() != null && !gameInput.getYear().isEmpty()) {
+            existingGame.setYear(gameInput.getYear());
+        }
+        if (gameInput.getDescription() != null && !gameInput.getDescription().isEmpty()) {
+            existingGame.setDescription(gameInput.getDescription());
+        }
     }
 
     public String deleteGame(int id) {

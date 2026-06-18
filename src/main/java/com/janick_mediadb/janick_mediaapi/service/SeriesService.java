@@ -8,6 +8,7 @@ import com.janick_mediadb.janick_mediaapi.entity.xref.SeriesRatingXrefEntity;
 import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
 import com.janick_mediadb.janick_mediaapi.exception.InternalServerException;
 import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
+import com.janick_mediadb.janick_mediaapi.exception.UnauthorizedException;
 import com.janick_mediadb.janick_mediaapi.input.MovieGenreInput;
 import com.janick_mediadb.janick_mediaapi.input.SeriesInput;
 import com.janick_mediadb.janick_mediaapi.model.FileInfoModel;
@@ -170,6 +171,60 @@ public class SeriesService {
         seriesGenreXrefService.saveSeriesGenreXref(seriesEntity, genreEntities);
 
         return seriesEntity.toModel();
+    }
+
+    public SeriesModel updateSeries(int id, SeriesInput seriesInput) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UsersEntity  user = userService.getUserByUsername(userDetails.getUsername());
+
+        SeriesEntity seriesEntity = seriesRepository.findById(id).orElseThrow(() -> new NotFoundException("Series with id " + id + " not found!"));
+
+        if (seriesEntity.getUser().getId() != user.getId() && user.getRoles().stream().noneMatch(role -> role.getName().equals("ADMIN"))) {
+            throw new UnauthorizedException("User " + user.getUsername() + " is not allowed to update series with id " + id);
+        }
+
+        List<MovieGenreEntity> genreEntities = new ArrayList<>();
+        if (!seriesInput.getGenres().isEmpty()) {
+            for (String genre : seriesInput.getGenres()) {
+                MovieGenreInput input = new MovieGenreInput();
+                input.setName(genre);
+                try {
+                    genreService.saveGenre(input);
+                } catch (BadRequestException _) {
+                    LOGGER.warn("Genre {} already exists", genre);
+                }
+            }
+
+            for (String genre : seriesInput.getGenres()) {
+                MovieGenreEntity movieGenreEntity = genreService.getGenreByName(genre);
+                genreEntities.add(movieGenreEntity);
+            }
+        }
+        seriesGenreXrefService.deleteSeriesGenreReferenceBySeriesId(id);
+        mapToEntity(seriesEntity, seriesInput);
+
+        Instant currentTime = Instant.now();
+        seriesEntity.setLastUpdated(currentTime);
+        seriesEntity = seriesRepository.save(seriesEntity);
+        LOGGER.info("updateSeries: Updating series {}", seriesEntity.toModel());
+        seriesGenreXrefService.saveSeriesGenreXref(seriesEntity, genreEntities);
+
+        return seriesEntity.toModel();
+    }
+
+    private void mapToEntity(SeriesEntity existingSeries, SeriesInput seriesInput) {
+        if (seriesInput.getName() != null && !seriesInput.getName().isEmpty()) {
+            existingSeries.setName(seriesInput.getName());
+        }
+        if (seriesInput.getYearStart() != null && !seriesInput.getYearStart().isEmpty()) {
+            existingSeries.setYearStart(seriesInput.getYearStart());
+        }
+        if (seriesInput.getYearEnd() != null && !seriesInput.getYearEnd().isEmpty()) {
+            existingSeries.setYearEnd(seriesInput.getYearEnd());
+        }
+        if (seriesInput.getEpisodeLength() != null) {
+            existingSeries.setEpisodeLength(seriesInput.getEpisodeLength());
+        }
     }
 
     public String deleteSeries(int id) {

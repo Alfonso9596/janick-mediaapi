@@ -14,6 +14,6 @@ public class SeriesInput extends AbstractModel {
     private String description;
     private String yearStart;
     private String yearEnd;
-    private int episodeLength;
+    private Integer episodeLength;
     private List<String> genres;
 }
