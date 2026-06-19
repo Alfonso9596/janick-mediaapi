@@ -47,14 +47,6 @@ public class MovieController {
                 .body(movieService.getMovieById(id));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteMovie(
-            @PathVariable("id") int id) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(movieService.deleteMovie(id));
-    }
-
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MovieModel> saveMovie(
             @RequestBody MovieInput movieInput) throws BadRequestException {
@@ -64,6 +56,11 @@ public class MovieController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(movieModel);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteMovie(@PathVariable int id) {
+        return movieService.deleteMovie(id);
     }
 
     @PutMapping("/{id}")

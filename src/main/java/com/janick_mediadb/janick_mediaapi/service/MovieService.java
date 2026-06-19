@@ -38,10 +38,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class MovieService {
@@ -227,21 +224,27 @@ public class MovieService {
         }
     }
 
-    public String deleteMovie(int id) {
+    public ResponseEntity<String> deleteMovie(int id) {
         Optional<MovieEntity> opMovie = movieRepository.findById(id);
         if (opMovie.isEmpty()) {
             String message = MessageFormat.format(MOVIE_WITH_ID_DOES_NOT_EXIST, id);
             LOGGER.error(message);
             throw new NotFoundException(message);
         }
+        MovieEntity movieEntity = opMovie.get();
+        UserDetailsImpl principal = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal.getId() != movieEntity.getUser().getId() && principal.getAuthorities().stream().noneMatch(role -> Objects.equals(role.getAuthority(), "ADMIN"))) {
+            throw new UnauthorizedException("User " + principal.getUsername() + " is not allowed to delete movie " + movieEntity.getName());
+        }
 
         movieGenreXrefService.deleteMovieGenreReferenceByMovieId(id);
         movieRatingXrefService.deleteMovieRatingReferenceByMovieId(id);
 
-        MovieEntity movieEntity = opMovie.get();
         LOGGER.info("deleteMovie: Deleting movie {}", movieEntity.toModel());
         movieRepository.delete(movieEntity);
-        return MessageFormat.format("The movie {0} has been deleted", movieEntity.getName());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(MessageFormat.format("The movie {0} has been deleted", movieEntity.getName()));
     }
 
     public String rateMovie(RatingUpdateModel ratingUpdateModel) {

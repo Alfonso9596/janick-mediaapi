@@ -38,10 +38,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class SeriesService {
@@ -227,21 +224,27 @@ public class SeriesService {
         }
     }
 
-    public String deleteSeries(int id) {
+    public ResponseEntity<String> deleteSeries(int id) {
         Optional<SeriesEntity> opSeries = seriesRepository.findById(id);
         if (opSeries.isEmpty()) {
             String message = MessageFormat.format(SERIES_WITH_ID_DOES_NOT_EXIST, id);
             LOGGER.error(message);
             throw new NotFoundException(message);
         }
+        SeriesEntity seriesEntity = opSeries.get();
+        UserDetailsImpl principal = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal.getId() != seriesEntity.getUser().getId() && principal.getAuthorities().stream().noneMatch(role -> Objects.equals(role.getAuthority(), "ADMIN"))) {
+            throw new UnauthorizedException("User " + principal.getUsername() + " is not allowed to delete series " + seriesEntity.getName());
+        }
 
         seriesGenreXrefService.deleteSeriesGenreReferenceBySeriesId(id);
         seriesRatingXrefService.deleteSeriesRatingReferenceBySeriesId(id);
 
-        SeriesEntity seriesEntity = opSeries.get();
         LOGGER.info("deleteSeries: Deleting series {}", seriesEntity.toModel());
         seriesRepository.delete(seriesEntity);
-        return MessageFormat.format("The series {0} has been deleted", seriesEntity.getName());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(MessageFormat.format("The series {0} has been deleted", seriesEntity.getName()));
     }
 
     public String rateSeries(RatingUpdateModel ratingUpdateModel) {

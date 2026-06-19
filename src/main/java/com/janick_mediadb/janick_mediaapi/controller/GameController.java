@@ -46,14 +46,6 @@ public class GameController {
                 .body(gameService.getGameById(id));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteGame(
-            @PathVariable("id") int id) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(gameService.deleteGame(id));
-    }
-
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GameModel> saveGame(
             @RequestBody GameInput gameInput) {
@@ -63,6 +55,11 @@ public class GameController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(gameModel);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteGame(@PathVariable("id") int id) {
+        return gameService.deleteGame(id);
     }
 
     @PutMapping("/{id}")

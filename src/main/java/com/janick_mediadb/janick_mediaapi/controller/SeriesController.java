@@ -46,14 +46,6 @@ public class SeriesController {
                 .body(seriesService.getSeriesById(id));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteSeries(
-            @PathVariable("id") int id) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(seriesService.deleteSeries(id));
-    }
-
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SeriesModel> saveSeries(
             @RequestBody SeriesInput seriesInput) {
@@ -63,6 +55,11 @@ public class SeriesController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(seriesModel);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteSeries(@PathVariable("id") int id) {
+        return seriesService.deleteSeries(id);
     }
 
     @PutMapping("/{id}")

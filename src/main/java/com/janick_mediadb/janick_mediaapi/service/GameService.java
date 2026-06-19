@@ -40,10 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class GameService {
@@ -274,21 +271,27 @@ public class GameService {
         }
     }
 
-    public String deleteGame(int id) {
+    public ResponseEntity<String> deleteGame(int id) {
         Optional<GameEntity> opGame = gameRepository.findById(id);
         if (opGame.isEmpty()) {
             String message = MessageFormat.format(GAME_WITH_ID_DOES_NOT_EXIST, id);
             LOGGER.error(message);
             throw new NotFoundException(message);
         }
+        GameEntity gameEntity = opGame.get();
+        UserDetailsImpl principal = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal.getId() != gameEntity.getUser().getId() && principal.getAuthorities().stream().noneMatch(role -> Objects.equals(role.getAuthority(), "ADMIN"))) {
+            throw new UnauthorizedException("User " + principal.getUsername() + " is not allowed to delete game " + gameEntity.getName());
+        }
 
         gameGenreXrefService.deleteGameGenreReferenceByGameId(id);
         gameRatingXrefService.deleteGameRatingReferenceByGameId(id);
 
-        GameEntity gameEntity = opGame.get();
         LOGGER.info("deleteGame: Deleting game {}", gameEntity.toModel());
         gameRepository.delete(gameEntity);
-        return MessageFormat.format("The game {0} has been deleted", gameEntity.getName());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(MessageFormat.format("The game {0} has been deleted", gameEntity.getName()));
     }
 
     public String rateGame(RatingUpdateModel ratingUpdateModel) {
