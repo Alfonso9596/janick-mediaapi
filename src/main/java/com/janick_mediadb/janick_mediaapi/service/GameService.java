@@ -286,6 +286,7 @@ public class GameService {
 
         gameGenreXrefService.deleteGameGenreReferenceByGameId(id);
         gameRatingXrefService.deleteGameRatingReferenceByGameId(id);
+        gamePlatformXrefService.deleteGamePlatformReferenceByGameId(id);
 
         LOGGER.info("deleteGame: Deleting game {}", gameEntity.toModel());
         gameRepository.delete(gameEntity);
