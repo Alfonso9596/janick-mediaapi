@@ -1,6 +1,7 @@
 package com.janick_mediadb.janick_mediaapi.entity.security;
 
 import com.janick_mediadb.janick_mediaapi.entity.AbstractEntity;
+import com.janick_mediadb.janick_mediaapi.input.admin.RoleInput;
 import com.janick_mediadb.janick_mediaapi.model.RoleModel;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -19,6 +20,10 @@ public class RoleEntity extends AbstractEntity {
     private int id;
 
     private String name;
+
+    public void fromInput(RoleInput roleInput) {
+        this.name = roleInput.getName();
+    }
 
     public RoleModel toModel() {
         RoleModel model = new RoleModel();

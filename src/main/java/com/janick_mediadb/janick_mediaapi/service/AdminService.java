@@ -80,6 +80,29 @@ public class AdminService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public UserResponse getPageableUsers(int page, int pageSize, String sortBy, String sortDir, UserSearchCriteria criteria) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, pageSize, sort);
+        Specification<UsersEntity> specification = createUserSpecs(criteria);
+
+        Page<UsersEntity> users = userRepository.findAll(specification, pageable);
+
+        List<UsersEntity> listOfUsers = users.getContent();
+        List<UserModel> content = listOfUsers.stream().map(UsersEntity::toModel).toList();
+
+        UserResponse userResponse = new UserResponse();
+        userResponse.setContent(content);
+        userResponse.setPage(users.getNumber());
+        userResponse.setPageSize(users.getSize());
+        userResponse.setTotalElements(users.getTotalElements());
+        userResponse.setTotalPages(users.getTotalPages());
+        userResponse.setLast(users.isLast());
+
+        return userResponse;
+    }
+
     public ResponseEntity<String> createUser(UserInput userInput) {
         if (Boolean.TRUE.equals(userRepository.existsByUsername(userInput.getUsername()))) {
             throw new BadRequestException("Username already exists!");
@@ -119,28 +142,6 @@ public class AdminService {
         userRepository.save(usersEntity);
 
         return ResponseEntity.ok().body("User has been updated successfully");
-    }
-
-    private UsersEntity mapToEntity(UsersEntity existingUser, UserInput userInput) {
-        UsersEntity user = new UsersEntity();
-
-        if (userInput.getUsername() != null && !userInput.getUsername().isEmpty()) {
-            user.setUsername(userInput.getUsername());
-        } else {
-            user.setUsername(existingUser.getUsername());
-        }
-        if (userInput.getPassword() != null && !userInput.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(userInput.getPassword()));
-        } else {
-            user.setPassword(existingUser.getPassword());
-        }
-
-        Set<RoleEntity> roles = userInput.getRoles().stream().map(r -> roleRepository.findByName(r).orElseThrow(() -> new NotFoundException("Role with name " + r + " not found!"))).collect(Collectors.toSet());
-        user.setRoles(roles);
-
-        user.setEnabled(userInput.isEnabled());
-
-        return user;
     }
 
     public MovieResponse getMoviesData() {
@@ -191,28 +192,6 @@ public class AdminService {
         return gameResponse;
     }
 
-    public UserResponse getAllUsers(int page, int pageSize, UserSearchCriteria criteria) {
-        Sort sort = Sort.by("username").ascending();
-
-        Pageable pageable = PageRequest.of(page, pageSize, sort);
-        Specification<UsersEntity> specification = createSpecs(criteria);
-
-        Page<UsersEntity> users = userRepository.findAll(specification, pageable);
-
-        List<UsersEntity> listOfUsers = users.getContent();
-        List<UserModel> content = listOfUsers.stream().map(UsersEntity::toModel).toList();
-
-        UserResponse userResponse = new UserResponse();
-        userResponse.setContent(content);
-        userResponse.setPage(users.getNumber());
-        userResponse.setPageSize(users.getSize());
-        userResponse.setTotalElements(users.getTotalElements());
-        userResponse.setTotalPages(users.getTotalPages());
-        userResponse.setLast(users.isLast());
-
-        return userResponse;
-    }
-
     public List<RoleModel> getAllRoles() {
         List<RoleModel> roles = new ArrayList<>();
         roleRepository.findAllOrderByName().forEach(role -> roles.add(role.toModel()));
@@ -221,7 +200,29 @@ public class AdminService {
         return roles;
     }
 
-    private Specification<UsersEntity> createSpecs(UserSearchCriteria criteria) {
+    private UsersEntity mapToEntity(UsersEntity existingUser, UserInput userInput) {
+        UsersEntity user = new UsersEntity();
+
+        if (userInput.getUsername() != null && !userInput.getUsername().isEmpty()) {
+            user.setUsername(userInput.getUsername());
+        } else {
+            user.setUsername(existingUser.getUsername());
+        }
+        if (userInput.getPassword() != null && !userInput.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(userInput.getPassword()));
+        } else {
+            user.setPassword(existingUser.getPassword());
+        }
+
+        Set<RoleEntity> roles = userInput.getRoles().stream().map(r -> roleRepository.findByName(r).orElseThrow(() -> new NotFoundException("Role with name " + r + " not found!"))).collect(Collectors.toSet());
+        user.setRoles(roles);
+
+        user.setEnabled(userInput.isEnabled());
+
+        return user;
+    }
+
+    private Specification<UsersEntity> createUserSpecs(UserSearchCriteria criteria) {
         Specification<UsersEntity> spec = Specification.unrestricted();
 
         if (criteria.getUsername() != null) {

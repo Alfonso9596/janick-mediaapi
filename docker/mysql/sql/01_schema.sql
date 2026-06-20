@@ -60,9 +60,10 @@ CREATE TABLE roles (
 -- Table structure for table users_roles_xref
 --
 CREATE TABLE users_roles_xref (
+    ID bigint NOT NULL AUTO_INCREMENT,
     USER_ID bigint NOT NULL,
     ROLE_ID bigint NOT NULL,
-    PRIMARY KEY (USER_ID,ROLE_ID),
+    PRIMARY KEY (ID),
     FOREIGN KEY (USER_ID) REFERENCES users (ID),
     FOREIGN KEY (ROLE_ID) REFERENCES roles (ID)
 );

@@ -7,10 +7,18 @@ import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
 import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
 import com.janick_mediadb.janick_mediaapi.input.MovieGenreInput;
 import com.janick_mediadb.janick_mediaapi.model.MovieGenreModel;
+import com.janick_mediadb.janick_mediaapi.model.response.GenreResponse;
+import com.janick_mediadb.janick_mediaapi.model.response.GenreSearchCriteria;
 import com.janick_mediadb.janick_mediaapi.repository.MovieGenreRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
@@ -38,6 +46,29 @@ public class MovieGenreService {
         this.movieGenreRepository = movieGenreRepository;
         this.movieGenreXrefService = movieGenreXrefService;
         this.seriesGenreXrefService = seriesGenreXrefService;
+    }
+
+    public GenreResponse getPageableGenres(int page, int pageSize, String sortBy, String sortDir, GenreSearchCriteria criteria) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, pageSize, sort);
+        Specification<MovieGenreEntity> specification = createSpecs(criteria);
+
+        Page<MovieGenreEntity> genres = movieGenreRepository.findAll(specification, pageable);
+
+        List<MovieGenreEntity> listOfGenres = genres.getContent();
+        List<MovieGenreModel> content = listOfGenres.stream().map(MovieGenreEntity::toModel).toList();
+
+        GenreResponse genreResponse = new GenreResponse();
+        genreResponse.setContent(content);
+        genreResponse.setPage(genres.getNumber());
+        genreResponse.setPageSize(genres.getSize());
+        genreResponse.setTotalElements(genres.getTotalElements());
+        genreResponse.setTotalPages(genres.getTotalPages());
+        genreResponse.setLast(genres.isLast());
+
+        return genreResponse;
     }
 
     public List<MovieGenreModel> getAllGenres() {
@@ -102,7 +133,7 @@ public class MovieGenreService {
 
         List<MovieEntity> movieEntities = movieGenreXrefService.findMoviesByGenre(id);
         List<SeriesEntity> seriesEntities = seriesGenreXrefService.findSeriesByGenre(id);
-        if (!movieEntities.isEmpty() || seriesEntities.isEmpty()) {
+        if (!movieEntities.isEmpty() || !seriesEntities.isEmpty()) {
             String message = MessageFormat.format("Genre {0} cannot be deleted, because there are still movies/series with this genre", opGenre.get().getName());
             LOGGER.error(message);
             throw new BadRequestException(message);
@@ -114,8 +145,28 @@ public class MovieGenreService {
         return MessageFormat.format("The genre {0} has been deleted", movieGenreEntity.getName());
     }
 
+    public ResponseEntity<String> updateGenre(int id, MovieGenreInput movieGenreInput) {
+        MovieGenreEntity genreEntity = movieGenreRepository.findById(id).orElseThrow(() -> new NotFoundException("Genre with id " + id + " not found!"));
+        genreEntity.setId(id);
+        genreEntity.setName(movieGenreInput.getName());
+
+        movieGenreRepository.save(genreEntity);
+
+        return ResponseEntity.ok().body("Movie genre has been updated successfully");
+    }
+
     private List<MovieGenreEntity> getAllGenreEntities() {
         return new ArrayList<>(movieGenreRepository.findAll());
+    }
+
+    private Specification<MovieGenreEntity> createSpecs(GenreSearchCriteria criteria) {
+        Specification<MovieGenreEntity> spec = Specification.unrestricted();
+
+        if (criteria.getName() != null) {
+            spec = spec.and(((root, _, criteriaBuilder) ->  criteriaBuilder.like(root.get("name"), "%" + criteria.getName() + "%")));
+        }
+
+        return spec;
     }
 
 }
