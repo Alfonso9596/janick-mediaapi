@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,6 +75,8 @@ public class MovieGenreService {
     public List<MovieGenreModel> getAllGenres() {
         List<MovieGenreModel> genres = new ArrayList<>();
         movieGenreRepository.findAllOrderByName().forEach(genre -> genres.add(genre.toModel()));
+
+        genres.sort(Comparator.comparing(MovieGenreModel::getName));
 
         LOGGER.info("getAllGenres: Found a total of {} genres.", genres.size());
         return genres;

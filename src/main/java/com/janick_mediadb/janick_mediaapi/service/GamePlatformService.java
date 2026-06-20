@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,6 +71,8 @@ public class GamePlatformService {
     public List<GamePlatformModel> getAllPlatforms() {
         List<GamePlatformModel> platforms = new ArrayList<>();
         gamePlatformRepository.findAllOrderByName().forEach(platform -> platforms.add(platform.toModel()));
+
+        platforms.sort(Comparator.comparing(GamePlatformModel::getName));
 
         LOGGER.info("getAllPlatforms: Found a total of {} platforms.", platforms.size());
         return platforms;
