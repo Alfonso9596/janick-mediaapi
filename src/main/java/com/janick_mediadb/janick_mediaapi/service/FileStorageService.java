@@ -12,7 +12,9 @@ public interface FileStorageService {
 
     void init();
 
-    void save(MultipartFile file, String title, String year, UploadMediaType mediaType);
+    void uploadPoster(MultipartFile file, String title, String year, UploadMediaType mediaType);
+
+    void uploadFile(MultipartFile file, String mediaId, UploadMediaType mediaType);
 
     Resource load(String filename) throws FileDownloadException;
 

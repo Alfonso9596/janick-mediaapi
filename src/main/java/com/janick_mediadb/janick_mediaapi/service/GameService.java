@@ -43,7 +43,7 @@ import java.time.Instant;
 import java.util.*;
 
 @Service
-public class GameService {
+public class GameService implements MediaService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GameService.class);
     private static final String GAME_FILES_PATH = "games/";
@@ -339,6 +339,20 @@ public class GameService {
         List<FileInfoModel> fileInfoModels = FileUtility.getDirList(filePath.toFile());
 
         return ResponseEntity.status(HttpStatus.OK).body(fileInfoModels);
+    }
+
+    @Override
+    public Path getMediaFilePath(int mediaId) {
+        Optional<GameEntity> opGame = gameRepository.findById(mediaId);
+        if (opGame.isEmpty()) {
+            String message = MessageFormat.format(GAME_WITH_ID_DOES_NOT_EXIST, mediaId);
+            LOGGER.error(message);
+            throw new NotFoundException(message);
+        }
+
+        GameEntity gameEntity = opGame.get();
+        String fileStorageName = NamingUtility.renameTitleForFilepath(gameEntity.getName()) + "_" + gameEntity.getYear();
+        return FileStorageServiceImpl.games.resolve(fileStorageName).resolve("files");
     }
 
     private List<GameEntity> getAllGameEntities() {

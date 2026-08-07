@@ -7,6 +7,7 @@ import com.janick_mediadb.janick_mediaapi.exception.InternalServerException;
 import com.janick_mediadb.janick_mediaapi.utils.NamingUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,13 @@ import java.util.stream.Stream;
 public class FileStorageServiceImpl implements FileStorageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileStorageServiceImpl.class);
+
+    private final MovieService movieService;
+
+    private final SeriesService seriesService;
+
+    private final GameService gameService;
+
     public static final String POSTER_FILE_TYPE = ".jpg";
 
     // TODO: Move resource paths to application context
@@ -31,6 +39,13 @@ public class FileStorageServiceImpl implements FileStorageService {
     public static final Path movies = Paths.get("uploads/movies");
     public static final Path series = Paths.get("uploads/series");
     public static final Path games = Paths.get("uploads/games");
+
+    @Autowired
+    public FileStorageServiceImpl(MovieService movieService, SeriesService seriesService, GameService gameService) {
+        this.movieService = movieService;
+        this.seriesService = seriesService;
+        this.gameService = gameService;
+    }
 
     @Override
     public void init() {
@@ -45,7 +60,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public void save(MultipartFile file, String title, String year, UploadMediaType mediaType) {
+    public void uploadPoster(MultipartFile file, String title, String year, UploadMediaType mediaType) {
         title = NamingUtility.renameTitleForFilepath(title) + "_" + year;
         Path path = createPathFromType(mediaType, title);
         LOGGER.info("Resolved to {}", path);
@@ -61,12 +76,24 @@ public class FileStorageServiceImpl implements FileStorageService {
         }
     }
 
-    private Path createPathFromType(UploadMediaType mediaType, String filename) {
-        return switch (mediaType) {
-            case GAME -> this.games.resolve(filename);
-            case MOVIE -> this.movies.resolve(filename);
-            case SERIES -> this.series.resolve(filename);
-        };
+    @Override
+    public void uploadFile(MultipartFile file, String mediaId, UploadMediaType mediaType) {
+        MediaService mediaService = mediaServiceResolver(mediaType);
+        if (mediaService == null) {
+            throw new InternalServerException("Media service for MediaType [" + mediaType.name() + "] not found!");
+        }
+        Path filePath = mediaService.getMediaFilePath(Integer.parseInt(mediaId));
+        LOGGER.info("Resolved to {}", filePath);
+        try {
+            if (!Files.exists(filePath)) {
+                Files.createDirectories(filePath);
+            }
+            Files.copy(file.getInputStream(), filePath.resolve(file.getOriginalFilename()));
+        } catch (FileAlreadyExistsException _) {
+            throw new BadRequestException("A file with the name " + filePath + " already exists");
+        } catch (IOException _) {
+            throw new InternalServerException("Could not save file!");
+        }
     }
 
     @Override
@@ -94,4 +121,26 @@ public class FileStorageServiceImpl implements FileStorageService {
         }
     }
 
+    private Path createPathFromType(UploadMediaType mediaType, String filename) {
+        return switch (mediaType) {
+            case GAME -> this.games.resolve(filename);
+            case MOVIE -> this.movies.resolve(filename);
+            case SERIES -> this.series.resolve(filename);
+        };
+    }
+
+    private MediaService mediaServiceResolver(UploadMediaType mediaType) {
+        switch (mediaType) {
+            case MOVIE -> {
+                return movieService;
+            }
+            case SERIES -> {
+                return seriesService;
+            }
+            case GAME -> {
+                return gameService;
+            }
+        }
+        return null;
+    }
 }

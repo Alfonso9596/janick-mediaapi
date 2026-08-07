@@ -74,39 +74,42 @@ INSERT INTO game_genre (ID, NAME) VALUES (9, 'Crafting');
 INSERT INTO game_genre (ID, NAME) VALUES (10, 'Dating-Sim');
 INSERT INTO game_genre (ID, NAME) VALUES (11, 'Deckbuilding');
 INSERT INTO game_genre (ID, NAME) VALUES (12, 'Escape Game');
-INSERT INTO game_genre (ID, NAME) VALUES (13, 'Fighting Game');
-INSERT INTO game_genre (ID, NAME) VALUES (14, 'Gesellschaftsspiel');
-INSERT INTO game_genre (ID, NAME) VALUES (15, 'Hack and Slash');
-INSERT INTO game_genre (ID, NAME) VALUES (16, 'Horror');
-INSERT INTO game_genre (ID, NAME) VALUES (17, 'Indie');
-INSERT INTO game_genre (ID, NAME) VALUES (18, 'Jump & Run');
-INSERT INTO game_genre (ID, NAME) VALUES (19, 'Kriegspiel');
-INSERT INTO game_genre (ID, NAME) VALUES (20, 'Laufsimulation');
-INSERT INTO game_genre (ID, NAME) VALUES (21, 'Looter-Shooter');
-INSERT INTO game_genre (ID, NAME) VALUES (22, 'Metroidvania');
-INSERT INTO game_genre (ID, NAME) VALUES (23, 'MMO');
-INSERT INTO game_genre (ID, NAME) VALUES (24, 'MOBA');
-INSERT INTO game_genre (ID, NAME) VALUES (25, 'Mystery');
-INSERT INTO game_genre (ID, NAME) VALUES (26, 'Open World');
-INSERT INTO game_genre (ID, NAME) VALUES (27, 'Point & Click');
-INSERT INTO game_genre (ID, NAME) VALUES (28, 'Puzzle');
-INSERT INTO game_genre (ID, NAME) VALUES (29, 'Rennspiel');
-INSERT INTO game_genre (ID, NAME) VALUES (30, 'Rhythmus');
-INSERT INTO game_genre (ID, NAME) VALUES (31, 'Roguelike');
-INSERT INTO game_genre (ID, NAME) VALUES (32, 'Roguelite');
-INSERT INTO game_genre (ID, NAME) VALUES (33, 'Rollenspiel');
-INSERT INTO game_genre (ID, NAME) VALUES (34, 'Sandbox');
-INSERT INTO game_genre (ID, NAME) VALUES (35, 'Schleichspiel');
-INSERT INTO game_genre (ID, NAME) VALUES (36, 'Shoot em up');
-INSERT INTO game_genre (ID, NAME) VALUES (37, 'Shooter');
-INSERT INTO game_genre (ID, NAME) VALUES (38, 'Simulation');
-INSERT INTO game_genre (ID, NAME) VALUES (39, 'Soulslike');
-INSERT INTO game_genre (ID, NAME) VALUES (40, 'Sport');
-INSERT INTO game_genre (ID, NAME) VALUES (41, 'Strategie');
-INSERT INTO game_genre (ID, NAME) VALUES (42, 'Survival');
-INSERT INTO game_genre (ID, NAME) VALUES (43, 'Tower Defense');
-INSERT INTO game_genre (ID, NAME) VALUES (44, 'Visual Novel');
-INSERT INTO game_genre (ID, NAME) VALUES (45, 'Fantasy');
+INSERT INTO game_genre (ID, NAME) VALUES (13, 'Gesellschaftsspiel');
+INSERT INTO game_genre (ID, NAME) VALUES (14, 'Hack and Slash');
+INSERT INTO game_genre (ID, NAME) VALUES (15, 'Horror');
+INSERT INTO game_genre (ID, NAME) VALUES (16, 'Indie');
+INSERT INTO game_genre (ID, NAME) VALUES (17, 'Jump & Run');
+INSERT INTO game_genre (ID, NAME) VALUES (18, 'Kampfspiel');
+INSERT INTO game_genre (ID, NAME) VALUES (19, 'Kreaturensammler');
+INSERT INTO game_genre (ID, NAME) VALUES (20, 'Kriegspiel');
+INSERT INTO game_genre (ID, NAME) VALUES (21, 'Laufsimulation');
+INSERT INTO game_genre (ID, NAME) VALUES (22, 'Looter-Shooter');
+INSERT INTO game_genre (ID, NAME) VALUES (23, 'Metroidvania');
+INSERT INTO game_genre (ID, NAME) VALUES (24, 'MMO');
+INSERT INTO game_genre (ID, NAME) VALUES (25, 'MOBA');
+INSERT INTO game_genre (ID, NAME) VALUES (26, 'Mystery');
+INSERT INTO game_genre (ID, NAME) VALUES (27, 'Open World');
+INSERT INTO game_genre (ID, NAME) VALUES (28, 'Point & Click');
+INSERT INTO game_genre (ID, NAME) VALUES (29, 'Puzzle');
+INSERT INTO game_genre (ID, NAME) VALUES (30, 'Rennspiel');
+INSERT INTO game_genre (ID, NAME) VALUES (31, 'Rhythmus');
+INSERT INTO game_genre (ID, NAME) VALUES (32, 'Roguelike');
+INSERT INTO game_genre (ID, NAME) VALUES (33, 'Roguelite');
+INSERT INTO game_genre (ID, NAME) VALUES (34, 'Rollenspiel');
+INSERT INTO game_genre (ID, NAME) VALUES (35, 'Rundenbasiert');
+INSERT INTO game_genre (ID, NAME) VALUES (36, 'Sandbox');
+INSERT INTO game_genre (ID, NAME) VALUES (37, 'Schleichspiel');
+INSERT INTO game_genre (ID, NAME) VALUES (38, 'Shoot em up');
+INSERT INTO game_genre (ID, NAME) VALUES (39, 'Shooter');
+INSERT INTO game_genre (ID, NAME) VALUES (40, 'Simulation');
+INSERT INTO game_genre (ID, NAME) VALUES (41, 'Soulslike');
+INSERT INTO game_genre (ID, NAME) VALUES (42, 'Sport');
+INSERT INTO game_genre (ID, NAME) VALUES (43, 'Strategie');
+INSERT INTO game_genre (ID, NAME) VALUES (44, 'Survival');
+INSERT INTO game_genre (ID, NAME) VALUES (45, 'Tower Defense');
+INSERT INTO game_genre (ID, NAME) VALUES (46, 'Visual Novel');
+INSERT INTO game_genre (ID, NAME) VALUES (47, 'Fantasy');
+
 --
 -- Initial values for table movie
 --
@@ -467,6 +470,16 @@ INSERT INTO game (ID, DESCRIPTION, NAME, YEAR, POSTER_FILEPATH, CREATED_AT, LAST
     '2026-02-07T15:24:53.365764',
     1
 );
+INSERT INTO game (ID, DESCRIPTION, NAME, YEAR, POSTER_FILEPATH, CREATED_AT, LAST_UPDATED, USER_ID) VALUES (
+    2,
+    'Mit Pokémon Smaragd wird die dritte Generation fortgesetzt. Das Abenteuer findet wie auch in Pokémon Rubin und Saphir in der Hoenn-Region statt, wo der Spieler die Machenschaften von Team Aqua und Team Magma verhindern muss. Die dritte Generation glänzt mit 135 neuen Pokémon; somit gibt es insgesamt 386. Wie bisher gibt es wieder drei Partner-Pokémon, von denen sich der Spieler eines aussuchen kann und anschließend in die Welt der Pokémon aufbricht, um einerseits der beste Pokémon-Trainer aller Zeiten zu werden und andererseits alle Pokémon zu fangen und den Pokédex zu vervollständigen.',
+    'Pokémon Smaragd',
+    2004,
+    'games/pokémon_smaragd_2004/pokémon_smaragd_2004.jpg',
+    '2026-08-06T15:24:53.365764',
+    '2026-08-06T15:24:53.365764',
+    1
+);
 
 --
 -- Initial values for table game_genre_xref
@@ -488,6 +501,23 @@ INSERT INTO game_genre_xref (GAME_ID, GENRE_ID) VALUES (
 	(SELECT ID FROM game_genre WHERE NAME = 'Horror')
 );
 
+INSERT INTO game_genre_xref (GAME_ID, GENRE_ID) VALUES (
+	(SELECT ID FROM game WHERE NAME = 'Pokémon Smaragd'),
+	(SELECT ID FROM game_genre WHERE NAME = 'Rundenbasiert')
+);
+INSERT INTO game_genre_xref (GAME_ID, GENRE_ID) VALUES (
+	(SELECT ID FROM game WHERE NAME = 'Pokémon Smaragd'),
+	(SELECT ID FROM game_genre WHERE NAME = 'Rollenspiel')
+);
+INSERT INTO game_genre_xref (GAME_ID, GENRE_ID) VALUES (
+	(SELECT ID FROM game WHERE NAME = 'Pokémon Smaragd'),
+	(SELECT ID FROM game_genre WHERE NAME = 'Kreaturensammler')
+);
+INSERT INTO game_genre_xref (GAME_ID, GENRE_ID) VALUES (
+	(SELECT ID FROM game WHERE NAME = 'Pokémon Smaragd'),
+	(SELECT ID FROM game_genre WHERE NAME = 'Kampfspiel')
+);
+
 --
 -- Initial values for table game_rating
 --
@@ -499,6 +529,12 @@ INSERT INTO game_rating (GAME_ID, USER_ID, RATING) VALUES (
 INSERT INTO game_rating (GAME_ID, USER_ID, RATING) VALUES (
 	(SELECT ID FROM game WHERE NAME = 'Elden Ring'),
 	(SELECT ID FROM users WHERE USERNAME = 'alfi'),
+	5
+);
+
+INSERT INTO game_rating (GAME_ID, USER_ID, RATING) VALUES (
+	(SELECT ID FROM game WHERE NAME = 'Pokémon Smaragd'),
+	(SELECT ID FROM users WHERE USERNAME = 'admin'),
 	5
 );
 
@@ -526,25 +562,10 @@ INSERT INTO game_platform (ID, NAME) VALUES (15, 'XBOX X/S');
 --
 INSERT INTO game_platform_xref (GAME_ID, PLATFORM_ID) VALUES (
     (SELECT ID FROM game WHERE NAME = 'Elden Ring'),
-    1
+    (SELECT ID FROM game_platform WHERE NAME = 'PC')
 );
+
 INSERT INTO game_platform_xref (GAME_ID, PLATFORM_ID) VALUES (
-    (SELECT ID FROM game WHERE NAME = 'Elden Ring'),
-    2
-);
-INSERT INTO game_platform_xref (GAME_ID, PLATFORM_ID) VALUES (
-    (SELECT ID FROM game WHERE NAME = 'Elden Ring'),
-    3
-);
-INSERT INTO game_platform_xref (GAME_ID, PLATFORM_ID) VALUES (
-    (SELECT ID FROM game WHERE NAME = 'Elden Ring'),
-    12
-);
-INSERT INTO game_platform_xref (GAME_ID, PLATFORM_ID) VALUES (
-    (SELECT ID FROM game WHERE NAME = 'Elden Ring'),
-    14
-);
-INSERT INTO game_platform_xref (GAME_ID, PLATFORM_ID) VALUES (
-    (SELECT ID FROM game WHERE NAME = 'Elden Ring'),
-    15
+    (SELECT ID FROM game WHERE NAME = 'Pokémon Smaragd'),
+    (SELECT ID FROM game_platform WHERE NAME = 'GBA')
 );

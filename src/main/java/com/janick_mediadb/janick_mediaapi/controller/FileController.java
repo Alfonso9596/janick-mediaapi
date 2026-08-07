@@ -39,7 +39,7 @@ public class FileController {
             @RequestParam("mediaType") UploadMediaType mediaType,
             @RequestPart("file") MultipartFile file) {
         try {
-            fileStorageService.save(file, title, year, mediaType);
+            fileStorageService.uploadPoster(file, title, year, mediaType);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body("Uploaded the poster successfully: " + title);
@@ -47,6 +47,23 @@ public class FileController {
             return ResponseEntity
                     .status(HttpStatus.EXPECTATION_FAILED)
                     .body("Could not upload the poster: " + title + ". Error: " + e.getMessage());
+        }
+    }
+
+    @PostMapping(value = "/api/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadFile(
+            @RequestPart("mediaId") String mediaId,
+            @RequestParam("mediaType") UploadMediaType mediaType,
+            @RequestPart("file") MultipartFile file) {
+        try {
+            fileStorageService.uploadFile(file, mediaId, mediaType);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body("Uploaded the file successfully: " + file.getName());
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .body("Could not upload the file: " + file.getName() + ". Error: " + e.getMessage());
         }
     }
 

@@ -41,7 +41,7 @@ import java.time.Instant;
 import java.util.*;
 
 @Service
-public class MovieService {
+public class MovieService implements MediaService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MovieService.class);
     private static final String MOVIE_FILES_PATH = "movies/";
@@ -291,6 +291,19 @@ public class MovieService {
         List<FileInfoModel> fileInfoModels = FileUtility.getDirList(filePath.toFile());
 
         return ResponseEntity.status(HttpStatus.OK).body(fileInfoModels);
+    }
+
+    @Override
+    public Path getMediaFilePath(int mediaId) {
+        Optional<MovieEntity> opMovie = movieRepository.findById(mediaId);
+        if (opMovie.isEmpty()) {
+            String message = MessageFormat.format(MOVIE_WITH_ID_DOES_NOT_EXIST, mediaId);
+            LOGGER.error(message);
+            throw new NotFoundException(message);
+        }
+        MovieEntity movieEntity = opMovie.get();
+        String fileStorageName = NamingUtility.renameTitleForFilepath(movieEntity.getName()) + "_" + movieEntity.getYear();
+        return FileStorageServiceImpl.movies.resolve(fileStorageName).resolve("files");
     }
 
     private List<MovieEntity> getAllMovieEntities() {

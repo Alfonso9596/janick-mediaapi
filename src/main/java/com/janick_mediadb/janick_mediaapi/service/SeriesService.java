@@ -41,7 +41,7 @@ import java.time.Instant;
 import java.util.*;
 
 @Service
-public class SeriesService {
+public class SeriesService implements MediaService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeriesService.class);
     private static final String SERIES_FILES_PATH = "series/";
@@ -290,6 +290,19 @@ public class SeriesService {
         List<FileInfoModel> fileInfoModels = FileUtility.getDirList(filePath.toFile());
 
         return ResponseEntity.status(HttpStatus.OK).body(fileInfoModels);
+    }
+
+    @Override
+    public Path getMediaFilePath(int mediaId) {
+        Optional<SeriesEntity> opSeries = seriesRepository.findById(mediaId);
+        if (opSeries.isEmpty()) {
+            String message = MessageFormat.format(SERIES_WITH_ID_DOES_NOT_EXIST, mediaId);
+            LOGGER.error(message);
+            throw new NotFoundException(message);
+        }
+        SeriesEntity seriesEntity = opSeries.get();
+        String fileStorageName = NamingUtility.renameTitleForFilepath(seriesEntity.getName()) + "_" + seriesEntity.getYearStart();
+        return FileStorageServiceImpl.series.resolve(fileStorageName).resolve("files");
     }
 
     private List<SeriesEntity> getAllSeriesEntities() {
