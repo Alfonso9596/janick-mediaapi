@@ -10,7 +10,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -35,7 +34,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 )
 public class SecurityConfig {
 
-    @Value("${spring.allowed.origin")
+    @Value("${spring.allowed.origin:*}")
     private String allowedOrigin;
 
     private final CustomUserDetailsService userDetailsService;
@@ -99,7 +98,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin(allowedOrigin);
+        if ("*".equals(allowedOrigin)) {
+            config.addAllowedOriginPattern("*");
+        } else {
+            config.addAllowedOrigin(allowedOrigin);
+        }
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         config.setAllowCredentials(true);
