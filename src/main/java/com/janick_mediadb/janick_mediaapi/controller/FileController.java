@@ -35,7 +35,7 @@ public class FileController {
     @PostMapping(value = "/api/files/uploadPoster", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadPoster(
             @RequestPart("filename") String title,
-            @RequestPart("artist") String artist,
+            @RequestPart(name = "artist", required = false) String artist,
             @RequestPart("year") String year,
             @RequestParam("mediaType") UploadMediaType mediaType,
             @RequestPart("file") MultipartFile file) {
