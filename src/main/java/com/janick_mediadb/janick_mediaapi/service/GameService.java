@@ -12,7 +12,7 @@ import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
 import com.janick_mediadb.janick_mediaapi.exception.UnauthorizedException;
 import com.janick_mediadb.janick_mediaapi.input.GameInput;
 import com.janick_mediadb.janick_mediaapi.input.GamePlatformInput;
-import com.janick_mediadb.janick_mediaapi.input.MovieGenreInput;
+import com.janick_mediadb.janick_mediaapi.input.GenreInput;
 import com.janick_mediadb.janick_mediaapi.model.FileInfoModel;
 import com.janick_mediadb.janick_mediaapi.model.GameModel;
 import com.janick_mediadb.janick_mediaapi.model.RatingUpdateModel;
@@ -57,7 +57,7 @@ public class GameService implements MediaService {
 
     private final GamePlatformXrefService gamePlatformXrefService;
 
-    private final GameGenreService genreService;
+    private final GameGenreService musicGenreService;
 
     private final GamePlatformService gamePlatformService;
 
@@ -69,7 +69,7 @@ public class GameService implements MediaService {
         this.gameGenreXrefService = gameGenreXrefService;
         this.gameRatingXrefService = gameRatingXrefService;
         this.gamePlatformXrefService = gamePlatformXrefService;
-        this.genreService = gameGenreService;
+        this.musicGenreService = gameGenreService;
         this.gamePlatformService = gamePlatformService;
         this.userService = userService;
     }
@@ -128,7 +128,7 @@ public class GameService implements MediaService {
     public GameModel saveGame(GameInput gameInput) {
         List<GameEntity> gameEntities = getAllGameEntities();
         Optional<GameEntity> opGame = gameEntities.stream()
-                .filter(game -> gameInput.getName().equals(game.getYear()))
+                .filter(game -> gameInput.getName().equals(game.getName()))
                 .filter(game -> gameInput.getYear().equals(game.getYear()))
                 .findAny();
 
@@ -141,17 +141,17 @@ public class GameService implements MediaService {
         List<GameGenreEntity> genreEntities = new ArrayList<>();
         if (!gameInput.getGenres().isEmpty()) {
             for (String genre : gameInput.getGenres()) {
-                MovieGenreInput input = new MovieGenreInput();
+                GenreInput input = new GenreInput();
                 input.setName(genre);
                 try {
-                    genreService.saveGenre(input);
+                    musicGenreService.saveGenre(input);
                 } catch (BadRequestException _) {
                     LOGGER.warn("Genre {} already exists", genre);
                 }
             }
 
             for (String genre : gameInput.getGenres()) {
-                GameGenreEntity gameGenreEntity = genreService.getGenreByName(genre);
+                GameGenreEntity gameGenreEntity = musicGenreService.getGenreByName(genre);
                 genreEntities.add(gameGenreEntity);
             }
         }
@@ -181,7 +181,7 @@ public class GameService implements MediaService {
         UsersEntity user = userService.getUserByUsername(userDetails.getUsername());
         gameEntity.setUser(user);
 
-        String filename = NamingUtility.renameTitleForFilepath(gameInput.getName()) + "_" + gameInput.getYear();
+        String filename = NamingUtility.renameTitleForFilepath(gameInput.getName(), gameInput.getYear());
 
         String posterFilename = GAME_FILES_PATH + filename + "/" + filename + FileStorageServiceImpl.POSTER_FILE_TYPE;
         gameEntity.setPosterFilepath(posterFilename);
@@ -203,7 +203,7 @@ public class GameService implements MediaService {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UsersEntity user = userService.getUserByUsername(userDetails.getUsername());
 
-        GameEntity gameEntity = gameRepository.findById(id).orElseThrow(() -> new NotFoundException("Game with id " + id + " not found!"));;
+        GameEntity gameEntity = gameRepository.findById(id).orElseThrow(() -> new NotFoundException("Game with id " + id + " not found!"));
 
         if (gameEntity.getUser().getId() != user.getId() && user.getRoles().stream().noneMatch(role -> role.getName().equals("ADMIN"))) {
             throw new UnauthorizedException("User " + user.getUsername() + " is not allowed to update game with id " + id);
@@ -212,17 +212,17 @@ public class GameService implements MediaService {
         List<GameGenreEntity> genreEntities = new ArrayList<>();
         if (!gameInput.getGenres().isEmpty()) {
             for (String genre : gameInput.getGenres()) {
-                MovieGenreInput input = new MovieGenreInput();
+                GenreInput input = new GenreInput();
                 input.setName(genre);
                 try {
-                    genreService.saveGenre(input);
+                    musicGenreService.saveGenre(input);
                 } catch (BadRequestException _) {
                     LOGGER.warn("Genre {} already exists", genre);
                 }
             }
 
             for (String genre : gameInput.getGenres()) {
-                GameGenreEntity gameGenreEntity = genreService.getGenreByName(genre);
+                GameGenreEntity gameGenreEntity = musicGenreService.getGenreByName(genre);
                 genreEntities.add(gameGenreEntity);
             }
         }
@@ -257,18 +257,6 @@ public class GameService implements MediaService {
         gamePlatformXrefService.saveGamePlatformXref(gameEntity, platformEntities);
 
         return gameEntity.toModel();
-    }
-
-    private void mapToEntity(GameEntity existingGame, GameInput gameInput) {
-        if (gameInput.getName() != null && !gameInput.getName().isEmpty()) {
-            existingGame.setName(gameInput.getName());
-        }
-        if (gameInput.getYear() != null && !gameInput.getYear().isEmpty()) {
-            existingGame.setYear(gameInput.getYear());
-        }
-        if (gameInput.getDescription() != null && !gameInput.getDescription().isEmpty()) {
-            existingGame.setDescription(gameInput.getDescription());
-        }
     }
 
     public ResponseEntity<String> deleteGame(int id) {
@@ -326,7 +314,7 @@ public class GameService implements MediaService {
             throw new NotFoundException(message);
         }
         GameEntity gameEntity = opGame.get();
-        String fileStorageName = NamingUtility.renameTitleForFilepath(gameEntity.getName()) + "_" + gameEntity.getYear();
+        String fileStorageName = NamingUtility.renameTitleForFilepath(gameEntity.getName(), gameEntity.getYear());
         Path filePath = FileStorageServiceImpl.games.resolve(fileStorageName).resolve("files");
 
         try {
@@ -351,7 +339,7 @@ public class GameService implements MediaService {
         }
 
         GameEntity gameEntity = opGame.get();
-        String fileStorageName = NamingUtility.renameTitleForFilepath(gameEntity.getName()) + "_" + gameEntity.getYear();
+        String fileStorageName = NamingUtility.renameTitleForFilepath(gameEntity.getName(), gameEntity.getYear());
         return FileStorageServiceImpl.games.resolve(fileStorageName).resolve("files");
     }
 
@@ -379,5 +367,17 @@ public class GameService implements MediaService {
         }
 
         return spec;
+    }
+
+    private void mapToEntity(GameEntity existingGame, GameInput gameInput) {
+        if (gameInput.getName() != null && !gameInput.getName().isEmpty()) {
+            existingGame.setName(gameInput.getName());
+        }
+        if (gameInput.getYear() != null && !gameInput.getYear().isEmpty()) {
+            existingGame.setYear(gameInput.getYear());
+        }
+        if (gameInput.getDescription() != null && !gameInput.getDescription().isEmpty()) {
+            existingGame.setDescription(gameInput.getDescription());
+        }
     }
 }

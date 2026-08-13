@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class MovieGenreModel extends AbstractModel {
+public class GenreModel extends AbstractModel {
 
     private int id;
     private String name;

@@ -17,11 +17,11 @@ public class TestClass {
     private static PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public static void main(String[] args) {
-        testNamingUtility("Avatar - Der Herr der Elemente");
+        testNamingUtility("Avatar - Der Herr der Elemente", "2010");
     }
 
-    private static void testNamingUtility(String title) {
-        System.out.println(NamingUtility.renameTitleForFilepath(title));
+    private static void testNamingUtility(String title, String year) {
+        System.out.println(NamingUtility.renameTitleForFilepath(title, year));
     }
 
     private static void testFileListing() throws IOException {

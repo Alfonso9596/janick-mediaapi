@@ -3,7 +3,7 @@ package com.janick_mediadb.janick_mediaapi.model;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Getter
@@ -28,9 +28,9 @@ public class GameModel extends AbstractModel {
 
     private List<String> platforms;
 
-    private Date createdAt;
+    private ZonedDateTime createdAt;
 
-    private Date lastUpdated;
+    private ZonedDateTime lastUpdated;
 
     private UserModel user;
 }

@@ -9,7 +9,7 @@ import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
 import com.janick_mediadb.janick_mediaapi.exception.InternalServerException;
 import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
 import com.janick_mediadb.janick_mediaapi.exception.UnauthorizedException;
-import com.janick_mediadb.janick_mediaapi.input.MovieGenreInput;
+import com.janick_mediadb.janick_mediaapi.input.GenreInput;
 import com.janick_mediadb.janick_mediaapi.input.MovieInput;
 import com.janick_mediadb.janick_mediaapi.model.FileInfoModel;
 import com.janick_mediadb.janick_mediaapi.model.MovieModel;
@@ -131,7 +131,7 @@ public class MovieService implements MediaService {
         List<MovieGenreEntity> genreEntities = new ArrayList<>();
         if (!movieInput.getGenres().isEmpty()) {
             for (String genre : movieInput.getGenres()) {
-                MovieGenreInput input = new MovieGenreInput();
+                GenreInput input = new GenreInput();
                 input.setName(genre);
                 try {
                     genreService.saveGenre(input);
@@ -153,7 +153,7 @@ public class MovieService implements MediaService {
         UsersEntity user = userService.getUserByUsername(userDetails.getUsername());
         movieEntity.setUser(user);
 
-        String filename = NamingUtility.renameTitleForFilepath(movieInput.getName()) + "_" + movieInput.getYear();
+        String filename = NamingUtility.renameTitleForFilepath(movieInput.getName(), movieInput.getYear());
 
         String posterFilename = MOVIE_FILES_PATH + filename + "/" + filename + FileStorageServiceImpl.POSTER_FILE_TYPE;
         movieEntity.setPosterFilepath(posterFilename);
@@ -183,7 +183,7 @@ public class MovieService implements MediaService {
         List<MovieGenreEntity> genreEntities = new ArrayList<>();
         if (!movieInput.getGenres().isEmpty()) {
             for (String genre : movieInput.getGenres()) {
-                MovieGenreInput input = new MovieGenreInput();
+                GenreInput input = new GenreInput();
                 input.setName(genre);
                 try {
                     genreService.saveGenre(input);
@@ -278,7 +278,7 @@ public class MovieService implements MediaService {
             throw new NotFoundException(message);
         }
         MovieEntity movieEntity = opMovie.get();
-        String fileStorageName = NamingUtility.renameTitleForFilepath(movieEntity.getName()) + "_" + movieEntity.getYear();
+        String fileStorageName = NamingUtility.renameTitleForFilepath(movieEntity.getName(), movieEntity.getYear());
         Path filePath = FileStorageServiceImpl.movies.resolve(fileStorageName).resolve("files");
 
         try {
@@ -302,7 +302,7 @@ public class MovieService implements MediaService {
             throw new NotFoundException(message);
         }
         MovieEntity movieEntity = opMovie.get();
-        String fileStorageName = NamingUtility.renameTitleForFilepath(movieEntity.getName()) + "_" + movieEntity.getYear();
+        String fileStorageName = NamingUtility.renameTitleForFilepath(movieEntity.getName(), movieEntity.getYear());
         return FileStorageServiceImpl.movies.resolve(fileStorageName).resolve("files");
     }
 

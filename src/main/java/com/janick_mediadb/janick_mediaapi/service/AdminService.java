@@ -4,6 +4,7 @@ import com.janick_mediadb.janick_mediaapi.auth.RefreshTokenService;
 import com.janick_mediadb.janick_mediaapi.auth.UserDetailsImpl;
 import com.janick_mediadb.janick_mediaapi.entity.GameEntity;
 import com.janick_mediadb.janick_mediaapi.entity.MovieEntity;
+import com.janick_mediadb.janick_mediaapi.entity.MusicEntity;
 import com.janick_mediadb.janick_mediaapi.entity.SeriesEntity;
 import com.janick_mediadb.janick_mediaapi.entity.security.RoleEntity;
 import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
@@ -43,6 +44,8 @@ public class AdminService {
 
     private final GameRepository gameRepository;
 
+    private final MusicRepository musicRepository;
+
     private final UserRepository userRepository;
 
     private final RoleRepository roleRepository;
@@ -59,15 +62,20 @@ public class AdminService {
 
     private final GameRatingXrefService gameRatingXrefService;
 
+    private final MusicGenreXrefService musicGenreXrefService;
+
+    private final MusicRatingXrefService musicRatingXrefService;
+
     private final RefreshTokenService refreshTokenService;
 
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AdminService(MovieRepository movieRepository, SeriesRepository seriesRepository, GameRepository gameRepository, UserRepository userRepository, RoleRepository roleRepository, MovieGenreXrefService movieGenreXrefService, MovieRatingXrefService movieRatingXrefService, SeriesGenreXrefService seriesGenreXrefService, SeriesRatingXrefService seriesRatingXrefService, GameGenreXrefService gameGenreXrefService, GameRatingXrefService gameRatingXrefService, RefreshTokenService refreshTokenService, PasswordEncoder passwordEncoder) {
+    public AdminService(MovieRepository movieRepository, SeriesRepository seriesRepository, GameRepository gameRepository, MusicRepository musicRepository, UserRepository userRepository, RoleRepository roleRepository, MovieGenreXrefService movieGenreXrefService, MovieRatingXrefService movieRatingXrefService, SeriesGenreXrefService seriesGenreXrefService, SeriesRatingXrefService seriesRatingXrefService, GameGenreXrefService gameGenreXrefService, GameRatingXrefService gameRatingXrefService, MusicGenreXrefService musicGenreXrefService, MusicRatingXrefService musicRatingXrefService, RefreshTokenService refreshTokenService, PasswordEncoder passwordEncoder) {
         this.movieRepository = movieRepository;
         this.seriesRepository = seriesRepository;
         this.gameRepository = gameRepository;
+        this.musicRepository = musicRepository;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.movieGenreXrefService = movieGenreXrefService;
@@ -76,6 +84,8 @@ public class AdminService {
         this.seriesRatingXrefService = seriesRatingXrefService;
         this.gameGenreXrefService = gameGenreXrefService;
         this.gameRatingXrefService = gameRatingXrefService;
+        this.musicGenreXrefService = musicGenreXrefService;
+        this.musicRatingXrefService = musicRatingXrefService;
         this.refreshTokenService = refreshTokenService;
         this.passwordEncoder = passwordEncoder;
     }
@@ -190,6 +200,22 @@ public class AdminService {
         gameResponse.setTotalElements(games.size());
 
         return gameResponse;
+    }
+
+    public MusicResponse getMusicData() {
+        List<MusicEntity> music = musicRepository.findAll();
+        List<MusicModel> content = music.stream().map(m -> {
+            MusicModel model = m.toModel();
+            musicGenreXrefService.collectGenres(m.getId(), model);
+            musicRatingXrefService.collectRatings(m.getId(), model);
+            return model;
+        }).toList();
+
+        MusicResponse musicResponse = new MusicResponse();
+        musicResponse.setContent(content);
+        musicResponse.setTotalElements(music.size());
+
+        return musicResponse;
     }
 
     public List<RoleModel> getAllRoles() {

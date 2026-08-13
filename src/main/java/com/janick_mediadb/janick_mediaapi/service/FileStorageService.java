@@ -12,7 +12,7 @@ public interface FileStorageService {
 
     void init();
 
-    void uploadPoster(MultipartFile file, String title, String year, UploadMediaType mediaType);
+    void uploadPoster(MultipartFile file, String title, String artist, String year, UploadMediaType mediaType);
 
     void uploadFile(MultipartFile file, String mediaId, UploadMediaType mediaType);
 

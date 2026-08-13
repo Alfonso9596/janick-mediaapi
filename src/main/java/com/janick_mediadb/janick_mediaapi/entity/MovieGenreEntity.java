@@ -1,12 +1,11 @@
 package com.janick_mediadb.janick_mediaapi.entity;
 
-import com.janick_mediadb.janick_mediaapi.input.MovieGenreInput;
-import com.janick_mediadb.janick_mediaapi.model.MovieGenreModel;
+import com.janick_mediadb.janick_mediaapi.input.GenreInput;
+import com.janick_mediadb.janick_mediaapi.model.GenreModel;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,12 +22,12 @@ public class MovieGenreEntity extends AbstractEntity {
 
     private String name;
 
-    public void fromInput(MovieGenreInput movieGenreInput) {
-        this.name = movieGenreInput.getName();
+    public void fromInput(GenreInput genreInput) {
+        this.name = genreInput.getName();
     }
 
-    public MovieGenreModel toModel() {
-        MovieGenreModel model = new MovieGenreModel();
+    public GenreModel toModel() {
+        GenreModel model = new GenreModel();
         model.setId(id);
         model.setName(name);
         return model;

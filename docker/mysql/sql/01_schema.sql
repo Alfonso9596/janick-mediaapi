@@ -235,3 +235,55 @@ CREATE TABLE game_platform_xref (
     FOREIGN KEY (GAME_ID) REFERENCES game (ID),
     FOREIGN KEY (PLATFORM_ID) REFERENCES game_platform (ID)
 );
+
+--
+-- Table structure for table music
+--
+CREATE TABLE music (
+    ID bigint AUTO_INCREMENT,
+    NAME VARCHAR(255) NOT NULL,
+    ARTIST VARCHAR(255) NOT NULL,
+    DESCRIPTION TEXT,
+    YEAR VARCHAR(4),
+    POSTER_FILEPATH VARCHAR(255),
+    CREATED_AT datetime(6) NOT NULL,
+    LAST_UPDATED datetime(6) NOT NULL,
+    USER_ID bigint NOT NULL,
+    PRIMARY KEY (ID),
+    FOREIGN KEY (USER_ID) REFERENCES users (ID)
+);
+
+--
+-- Table structure for table music_genre
+--
+CREATE TABLE music_genre (
+    ID bigint AUTO_INCREMENT,
+	NAME VARCHAR(255) NOT NULL,
+	PRIMARY KEY (ID)
+);
+
+--
+-- Table structure for table music_genre_xref
+--
+CREATE TABLE music_genre_xref (
+    ID bigint AUTO_INCREMENT,
+	MUSIC_ID bigint NOT NULL,
+	GENRE_ID bigint NOT NULL,
+	PRIMARY KEY (ID),
+	FOREIGN KEY (MUSIC_ID) REFERENCES music (ID),
+	FOREIGN KEY (GENRE_ID) REFERENCES music_genre (ID)
+);
+
+--
+-- Table structure for table music_rating
+--
+CREATE TABLE music_rating (
+    ID bigint AUTO_INCREMENT,
+    MUSIC_ID bigint NOT NULL,
+    USER_ID bigint NOT NULL,
+    RATING INT NOT NULL,
+    PRIMARY KEY (ID),
+    UNIQUE KEY UK_MUSIC_RATING_USER (MUSIC_ID, USER_ID),
+    FOREIGN KEY (MUSIC_ID) REFERENCES music (ID),
+    FOREIGN KEY (USER_ID) REFERENCES users (ID)
+);

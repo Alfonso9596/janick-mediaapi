@@ -5,8 +5,8 @@ import com.janick_mediadb.janick_mediaapi.entity.MovieGenreEntity;
 import com.janick_mediadb.janick_mediaapi.entity.SeriesEntity;
 import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
 import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
-import com.janick_mediadb.janick_mediaapi.input.MovieGenreInput;
-import com.janick_mediadb.janick_mediaapi.model.MovieGenreModel;
+import com.janick_mediadb.janick_mediaapi.input.GenreInput;
+import com.janick_mediadb.janick_mediaapi.model.GenreModel;
 import com.janick_mediadb.janick_mediaapi.model.response.GenreResponse;
 import com.janick_mediadb.janick_mediaapi.model.response.GenreSearchCriteria;
 import com.janick_mediadb.janick_mediaapi.repository.MovieGenreRepository;
@@ -59,7 +59,7 @@ public class MovieGenreService {
         Page<MovieGenreEntity> genres = movieGenreRepository.findAll(specification, pageable);
 
         List<MovieGenreEntity> listOfGenres = genres.getContent();
-        List<MovieGenreModel> content = listOfGenres.stream().map(MovieGenreEntity::toModel).toList();
+        List<GenreModel> content = listOfGenres.stream().map(MovieGenreEntity::toModel).toList();
 
         GenreResponse genreResponse = new GenreResponse();
         genreResponse.setContent(content);
@@ -72,11 +72,11 @@ public class MovieGenreService {
         return genreResponse;
     }
 
-    public List<MovieGenreModel> getAllGenres() {
-        List<MovieGenreModel> genres = new ArrayList<>();
+    public List<GenreModel> getAllGenres() {
+        List<GenreModel> genres = new ArrayList<>();
         movieGenreRepository.findAllOrderByName().forEach(genre -> genres.add(genre.toModel()));
 
-        genres.sort(Comparator.comparing(MovieGenreModel::getName));
+        genres.sort(Comparator.comparing(GenreModel::getName));
 
         LOGGER.info("getAllGenres: Found a total of {} genres.", genres.size());
         return genres;
@@ -94,7 +94,7 @@ public class MovieGenreService {
         }
     }
 
-    public MovieGenreModel getGenreById(int id) {
+    public GenreModel getGenreById(int id) {
         Optional<MovieGenreEntity> opGenre = movieGenreRepository.findById(id);
         if (opGenre.isPresent()) {
             LOGGER.info("getGenreById: Found genre with id {}", id);
@@ -106,20 +106,20 @@ public class MovieGenreService {
         }
     }
 
-    public MovieGenreModel saveGenre(MovieGenreInput movieGenreInput) {
+    public GenreModel saveGenre(GenreInput genreInput) {
         List<MovieGenreEntity> genres = getAllGenreEntities();
         Optional<MovieGenreEntity> op = genres.stream()
-                .filter(genreEntity -> movieGenreInput.getName().equalsIgnoreCase(genreEntity.getName()))
+                .filter(genreEntity -> genreInput.getName().equalsIgnoreCase(genreEntity.getName()))
                 .findAny();
 
         if (op.isPresent()) {
-            String message = MessageFormat.format(GENRE_ALREADY_REGISTERED, movieGenreInput.getName());
+            String message = MessageFormat.format(GENRE_ALREADY_REGISTERED, genreInput.getName());
             LOGGER.error(message);
             throw new BadRequestException(message);
         }
 
         MovieGenreEntity movieGenreEntity = new MovieGenreEntity();
-        movieGenreEntity.fromInput(movieGenreInput);
+        movieGenreEntity.fromInput(genreInput);
 
         LOGGER.info("saveGenre: Saving genre {}", movieGenreEntity.toModel());
 
@@ -148,10 +148,10 @@ public class MovieGenreService {
         return MessageFormat.format("The genre {0} has been deleted", movieGenreEntity.getName());
     }
 
-    public ResponseEntity<String> updateGenre(int id, MovieGenreInput movieGenreInput) {
+    public ResponseEntity<String> updateGenre(int id, GenreInput genreInput) {
         MovieGenreEntity genreEntity = movieGenreRepository.findById(id).orElseThrow(() -> new NotFoundException("Genre with id " + id + " not found!"));
         genreEntity.setId(id);
-        genreEntity.setName(movieGenreInput.getName());
+        genreEntity.setName(genreInput.getName());
 
         movieGenreRepository.save(genreEntity);
 

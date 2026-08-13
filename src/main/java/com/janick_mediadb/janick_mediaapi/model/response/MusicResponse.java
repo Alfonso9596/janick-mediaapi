@@ -1,6 +1,6 @@
 package com.janick_mediadb.janick_mediaapi.model.response;
 
-import com.janick_mediadb.janick_mediaapi.model.GenreModel;
+import com.janick_mediadb.janick_mediaapi.model.MusicModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,6 +12,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GenreResponse extends AbstractResponse {
-    private List<GenreModel> content;
+public class MusicResponse extends AbstractResponse {
+    private List<MusicModel> content;
 }

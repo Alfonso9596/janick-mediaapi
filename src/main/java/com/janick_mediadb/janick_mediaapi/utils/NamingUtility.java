@@ -6,7 +6,14 @@ public class NamingUtility {
         throw new IllegalStateException("Utility class");
     }
 
-    public static String renameTitleForFilepath(String title) {
-        return title.toLowerCase().replace(":", "").replace(" - ", "_").replace("-", " ").replace(" ", "_");
+    public static String renameTitleForFilepath(String title, String year) {
+        String cleanTitle = title.toLowerCase().replace(":", "").replace(" - ", "_").replace("-", " ").replace(" ", "_");
+        return cleanTitle + "_" + year;
+    }
+
+    public static String renameTitleForMusicFilepath(String title, String artist, String year) {
+        String cleanTitle = title.toLowerCase().replace(":", "").replace(" - ", "_").replace("-", " ").replace(" ", "_");
+        String cleanArtist = artist.toLowerCase().replace(":", "").replace(" - ", "_").replace("-", " ").replace(" ", "_");
+        return cleanTitle + "_" + cleanArtist + "_" + year;
     }
 }

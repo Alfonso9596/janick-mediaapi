@@ -9,7 +9,7 @@ import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
 import com.janick_mediadb.janick_mediaapi.exception.InternalServerException;
 import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
 import com.janick_mediadb.janick_mediaapi.exception.UnauthorizedException;
-import com.janick_mediadb.janick_mediaapi.input.MovieGenreInput;
+import com.janick_mediadb.janick_mediaapi.input.GenreInput;
 import com.janick_mediadb.janick_mediaapi.input.SeriesInput;
 import com.janick_mediadb.janick_mediaapi.model.FileInfoModel;
 import com.janick_mediadb.janick_mediaapi.model.RatingUpdateModel;
@@ -131,7 +131,7 @@ public class SeriesService implements MediaService {
         List<MovieGenreEntity> genreEntities = new ArrayList<>();
         if (!seriesInput.getGenres().isEmpty()) {
             for (String genre : seriesInput.getGenres()) {
-                MovieGenreInput input = new MovieGenreInput();
+                GenreInput input = new GenreInput();
                 input.setName(genre);
                 try {
                     genreService.saveGenre(input);
@@ -153,7 +153,7 @@ public class SeriesService implements MediaService {
         UsersEntity user = userService.getUserByUsername(userDetails.getUsername());
         seriesEntity.setUser(user);
 
-        String filename = NamingUtility.renameTitleForFilepath(seriesInput.getName()) + "_" + seriesInput.getYearStart();
+        String filename = NamingUtility.renameTitleForFilepath(seriesInput.getName(), seriesInput.getYearStart());
 
         String posterFilename = SERIES_FILES_PATH + filename + "/" + filename + FileStorageServiceImpl.POSTER_FILE_TYPE;
         seriesEntity.setPosterFilepath(posterFilename);
@@ -183,7 +183,7 @@ public class SeriesService implements MediaService {
         List<MovieGenreEntity> genreEntities = new ArrayList<>();
         if (!seriesInput.getGenres().isEmpty()) {
             for (String genre : seriesInput.getGenres()) {
-                MovieGenreInput input = new MovieGenreInput();
+                GenreInput input = new GenreInput();
                 input.setName(genre);
                 try {
                     genreService.saveGenre(input);
@@ -277,7 +277,7 @@ public class SeriesService implements MediaService {
             throw new NotFoundException(message);
         }
         SeriesEntity seriesEntity = opSeries.get();
-        String fileStorageName = NamingUtility.renameTitleForFilepath(seriesEntity.getName()) + "_" + seriesEntity.getYearStart();
+        String fileStorageName = NamingUtility.renameTitleForFilepath(seriesEntity.getName(), seriesEntity.getYearStart());
         Path filePath = FileStorageServiceImpl.series.resolve(fileStorageName).resolve("files");
 
         try {
@@ -301,7 +301,7 @@ public class SeriesService implements MediaService {
             throw new NotFoundException(message);
         }
         SeriesEntity seriesEntity = opSeries.get();
-        String fileStorageName = NamingUtility.renameTitleForFilepath(seriesEntity.getName()) + "_" + seriesEntity.getYearStart();
+        String fileStorageName = NamingUtility.renameTitleForFilepath(seriesEntity.getName(), seriesEntity.getYearStart());
         return FileStorageServiceImpl.series.resolve(fileStorageName).resolve("files");
     }
 

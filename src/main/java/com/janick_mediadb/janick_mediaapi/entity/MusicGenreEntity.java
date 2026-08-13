@@ -11,10 +11,10 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Table(name = GameGenreEntity.GAME_GENRE_TABLE_NAME)
-public class GameGenreEntity extends AbstractEntity {
+@Table(name = MusicGenreEntity.MUSIC_GENRE_TABLE_NAME)
+public class MusicGenreEntity extends AbstractEntity {
 
-    static final String GAME_GENRE_TABLE_NAME = "game_genre";
+    static final String MUSIC_GENRE_TABLE_NAME = "music_genre";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,8 +22,8 @@ public class GameGenreEntity extends AbstractEntity {
 
     private String name;
 
-    public void fromInput(GenreInput genreInput) {
-        this.name = genreInput.getName();
+    public void fromInput(GenreInput musicGenreInput) {
+        this.name = musicGenreInput.getName();
     }
 
     public GenreModel toModel() {
@@ -33,7 +33,7 @@ public class GameGenreEntity extends AbstractEntity {
         return model;
     }
 
-    public static List<String> toModels(List<GameGenreEntity> genres) {
-        return genres.stream().map(GameGenreEntity::getName).toList();
+    public static List<String> toModels(List<MusicGenreEntity> genres) {
+        return genres.stream().map(MusicGenreEntity::getName).toList();
     }
 }

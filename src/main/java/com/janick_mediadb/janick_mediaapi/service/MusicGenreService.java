@@ -1,14 +1,15 @@
 package com.janick_mediadb.janick_mediaapi.service;
 
-import com.janick_mediadb.janick_mediaapi.entity.GameEntity;
-import com.janick_mediadb.janick_mediaapi.entity.GameGenreEntity;
+import com.janick_mediadb.janick_mediaapi.entity.MusicEntity;
+import com.janick_mediadb.janick_mediaapi.entity.MusicGenreEntity;
 import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
 import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
 import com.janick_mediadb.janick_mediaapi.input.GenreInput;
 import com.janick_mediadb.janick_mediaapi.model.GenreModel;
 import com.janick_mediadb.janick_mediaapi.model.response.GenreResponse;
 import com.janick_mediadb.janick_mediaapi.model.response.GenreSearchCriteria;
-import com.janick_mediadb.janick_mediaapi.repository.GameGenreRepository;
+import com.janick_mediadb.janick_mediaapi.repository.MusicGenreRepository;
+import com.janick_mediadb.janick_mediaapi.repository.xref.MusicGenreXrefRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,36 +28,36 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class GameGenreService {
+public class MusicGenreService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GameGenreService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MusicGenreService.class);
 
     private static final String GENRE_NAME_NOT_EXIST = "Genre with name {0} does not exist";
     private static final String GENRE_ID_NOT_EXIST = "Genre with id {0} does not exist";
     private static final String GENRE_ALREADY_REGISTERED = "The genre {0} is already registered";
-    private static final String GENRE_REFERENCED_BY_GAMES = "The genre {0} cannot be deleted, because there are still games referenced with this genre";
+    private static final String GENRE_REFERENCED_BY_MUSIC = "The genre {0} cannot be deleted, because there is still music referenced with this genre";
 
-    private final GameGenreRepository gameGenreRepository;
+    private final MusicGenreRepository musicGenreRepository;
 
-    private final GameGenreXrefService gameGenreXrefService;
+    private final MusicGenreXrefService musicGenreXrefService;
 
     @Autowired
-    public GameGenreService(GameGenreRepository gameGenreRepository, GameGenreXrefService gameGenreXrefService) {
-        this.gameGenreRepository = gameGenreRepository;
-        this.gameGenreXrefService = gameGenreXrefService;
+    public MusicGenreService(MusicGenreRepository musicGenreRepository, MusicGenreXrefService musicGenreXrefService) {
+        this.musicGenreRepository = musicGenreRepository;
+        this.musicGenreXrefService = musicGenreXrefService;
     }
 
-    public GenreResponse getPageableGenres(int page, int pageSize, String sortBy, String sortDir, GenreSearchCriteria criteria) {
+    public GenreResponse getPageableGenres(int page, int pageSIze, String sortBy, String sortDir, GenreSearchCriteria criteria) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
 
-        Pageable pageable = PageRequest.of(page, pageSize, sort);
-        Specification<GameGenreEntity> specification = createSpecs(criteria);
+        Pageable pageable = PageRequest.of(page, pageSIze, sort);
+        Specification<MusicGenreEntity> specification = createSpecs(criteria);
 
-        Page<GameGenreEntity> genres = gameGenreRepository.findAll(specification, pageable);
+        Page<MusicGenreEntity> genres = musicGenreRepository.findAll(specification, pageable);
 
-        List<GameGenreEntity> listOfGenres = genres.getContent();
-        List<GenreModel> content = listOfGenres.stream().map(GameGenreEntity::toModel).toList();
+        List<MusicGenreEntity> listOfGenres = genres.getContent();
+        List<GenreModel> content = listOfGenres.stream().map(MusicGenreEntity::toModel).toList();
 
         GenreResponse genreResponse = new GenreResponse();
         genreResponse.setContent(content);
@@ -71,7 +72,7 @@ public class GameGenreService {
 
     public List<GenreModel> getAllGenres() {
         List<GenreModel> genres = new ArrayList<>();
-        gameGenreRepository.findAll().forEach(genre -> genres.add(genre.toModel()));
+        musicGenreRepository.findAll().forEach(genre -> genres.add(genre.toModel()));
 
         genres.sort(Comparator.comparing(GenreModel::getName));
 
@@ -79,8 +80,8 @@ public class GameGenreService {
         return genres;
     }
 
-    public GameGenreEntity getGenreByName(String name) {
-        Optional<GameGenreEntity> opGenre = gameGenreRepository.findByName(name);
+    public MusicGenreEntity getGenreByName(String name) {
+        Optional<MusicGenreEntity> opGenre = musicGenreRepository.findByName(name);
         if (opGenre.isPresent()) {
             LOGGER.info("getGenreByName: Found genre with name {}", name);
             return opGenre.get();
@@ -92,7 +93,7 @@ public class GameGenreService {
     }
 
     public GenreModel getGenreById(int id) {
-        Optional<GameGenreEntity> opGenre = gameGenreRepository.findById(id);
+        Optional<MusicGenreEntity> opGenre = musicGenreRepository.findById(id);
         if (opGenre.isPresent()) {
             LOGGER.info("getGenreById: Found genre with id {}", id);
             return opGenre.get().toModel();
@@ -104,8 +105,8 @@ public class GameGenreService {
     }
 
     public GenreModel saveGenre(GenreInput genreInput) {
-        List<GameGenreEntity> genres = getAllGenreEntities();
-        Optional<GameGenreEntity> op = genres.stream()
+        List<MusicGenreEntity> genres = getAllGenreEntities();
+        Optional<MusicGenreEntity> op = genres.stream()
                 .filter(genreEntity -> genreInput.getName().equalsIgnoreCase(genreEntity.getName()))
                 .findAny();
 
@@ -115,51 +116,51 @@ public class GameGenreService {
             throw new BadRequestException(message);
         }
 
-        GameGenreEntity gameGenreEntity = new GameGenreEntity();
-        gameGenreEntity.fromInput(genreInput);
+        MusicGenreEntity musicGenreEntity = new MusicGenreEntity();
+        musicGenreEntity.fromInput(genreInput);
 
-        LOGGER.info("saveGenre: Saving genre {}", gameGenreEntity.toModel());
+        LOGGER.info("saveGenre: Saving genre {}", musicGenreEntity.toModel());
 
-        return gameGenreRepository.save(gameGenreEntity).toModel();
+        return musicGenreRepository.save(musicGenreEntity).toModel();
     }
 
     public String deleteGenre(int id) {
-        Optional<GameGenreEntity> opGenre = gameGenreRepository.findById(id);
+        Optional<MusicGenreEntity> opGenre = musicGenreRepository.findById(id);
         if (opGenre.isEmpty()) {
             String message = MessageFormat.format(GENRE_ID_NOT_EXIST, id);
             LOGGER.error(message);
             throw new NotFoundException(message);
         }
 
-        List<GameEntity> gameEntities = gameGenreXrefService.findGamesByGenre(id);
-        if (!gameEntities.isEmpty()) {
-            String message = MessageFormat.format(GENRE_REFERENCED_BY_GAMES, opGenre.get().getName());
+        List<MusicEntity> musicEntities = musicGenreXrefService.findMusicByGenre(id);
+        if (!musicEntities.isEmpty()) {
+            String message = MessageFormat.format(GENRE_REFERENCED_BY_MUSIC, opGenre.get().getName());
             LOGGER.error(message);
             throw new BadRequestException(message);
         }
 
-        GameGenreEntity gameGenreEntity = opGenre.get();
-        LOGGER.info("deleteGenre: Deleting genre {}", gameGenreEntity.toModel());
-        gameGenreRepository.delete(gameGenreEntity);
-        return MessageFormat.format("The genre {0} has been deleted", gameGenreEntity.getName());
+        MusicGenreEntity musicGenreEntity = opGenre.get();
+        LOGGER.info("deleteGenre: Deleting genre {}", musicGenreEntity.toModel());
+        musicGenreRepository.delete(musicGenreEntity);
+        return MessageFormat.format("The genre {0} has been deleted", musicGenreEntity.getName());
     }
 
     public ResponseEntity<String> updateGenre(int id, GenreInput genreInput) {
-        GameGenreEntity genreEntity = gameGenreRepository.findById(id).orElseThrow(() -> new NotFoundException("Genre with id " + id + " not found"));
+        MusicGenreEntity genreEntity = musicGenreRepository.findById(id).orElseThrow(() -> new NotFoundException("Genre with id " + id + " not found"));
         genreEntity.setId(id);
         genreEntity.setName(genreInput.getName());
 
-        gameGenreRepository.save(genreEntity);
+        musicGenreRepository.save(genreEntity);
 
-        return ResponseEntity.ok().body("Game genre has been updated successfully");
+        return ResponseEntity.ok().body("Music genre has been updated successfully");
     }
 
-    private List<GameGenreEntity> getAllGenreEntities() {
-        return new ArrayList<>(gameGenreRepository.findAll());
+    private List<MusicGenreEntity> getAllGenreEntities() {
+        return new ArrayList<>(musicGenreRepository.findAll());
     }
 
-    private Specification<GameGenreEntity> createSpecs(GenreSearchCriteria criteria) {
-        Specification<GameGenreEntity> spec = Specification.unrestricted();
+    private Specification<MusicGenreEntity> createSpecs(GenreSearchCriteria criteria) {
+        Specification<MusicGenreEntity> spec = Specification.unrestricted();
 
         if (criteria.getName() != null) {
             spec = spec.and(((root, _, criteriaBuilder) ->  criteriaBuilder.like(root.get("name"), "%" + criteria.getName() + "%")));

@@ -32,6 +32,8 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     private final GameService gameService;
 
+    private final MusicService musicService;
+
     public static final String POSTER_FILE_TYPE = ".jpg";
 
     // TODO: Move resource paths to application context
@@ -39,12 +41,14 @@ public class FileStorageServiceImpl implements FileStorageService {
     public static final Path movies = Paths.get("uploads/movies");
     public static final Path series = Paths.get("uploads/series");
     public static final Path games = Paths.get("uploads/games");
+    public static final Path music = Paths.get("uploads/music");
 
     @Autowired
-    public FileStorageServiceImpl(MovieService movieService, SeriesService seriesService, GameService gameService) {
+    public FileStorageServiceImpl(MovieService movieService, SeriesService seriesService, GameService gameService, MusicService musicService) {
         this.movieService = movieService;
         this.seriesService = seriesService;
         this.gameService = gameService;
+        this.musicService = musicService;
     }
 
     @Override
@@ -54,14 +58,19 @@ public class FileStorageServiceImpl implements FileStorageService {
             Files.createDirectories(movies);
             Files.createDirectories(series);
             Files.createDirectories(games);
+            Files.createDirectories(music);
         } catch (IOException _) {
             throw new InternalServerException("Could not initialize folder for upload!");
         }
     }
 
     @Override
-    public void uploadPoster(MultipartFile file, String title, String year, UploadMediaType mediaType) {
-        title = NamingUtility.renameTitleForFilepath(title) + "_" + year;
+    public void uploadPoster(MultipartFile file, String title, String artist, String year, UploadMediaType mediaType) {
+        if (mediaType.equals(UploadMediaType.MUSIC)) {
+            title = NamingUtility.renameTitleForMusicFilepath(title, artist, year);
+        } else {
+            title = NamingUtility.renameTitleForFilepath(title, year);
+        }
         Path path = createPathFromType(mediaType, title);
         LOGGER.info("Resolved to {}", path);
         try {
@@ -126,6 +135,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             case GAME -> this.games.resolve(filename);
             case MOVIE -> this.movies.resolve(filename);
             case SERIES -> this.series.resolve(filename);
+            case MUSIC -> this.music.resolve(filename);
         };
     }
 
@@ -139,6 +149,9 @@ public class FileStorageServiceImpl implements FileStorageService {
             }
             case GAME -> {
                 return gameService;
+            }
+            case MUSIC -> {
+                return musicService;
             }
         }
         return null;

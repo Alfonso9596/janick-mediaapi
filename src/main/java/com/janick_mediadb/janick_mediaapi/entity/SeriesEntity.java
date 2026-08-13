@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
-import java.util.Date;
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -61,8 +61,8 @@ public class SeriesEntity extends AbstractEntity {
         model.setYearEnd(yearEnd);
         model.setEpisodeLength(episodeLength);
         model.setPosterFilepath(posterFilepath);
-        model.setCreatedAt(Date.from(createdAt));
-        model.setLastUpdated(Date.from(lastUpdated));
+        model.setCreatedAt(createdAt.atZone(ZoneId.of("Europe/Zurich")));
+        model.setLastUpdated(lastUpdated.atZone(ZoneId.of("Europe/Zurich")));
         model.setUser(user.toModel());
         return model;
     }

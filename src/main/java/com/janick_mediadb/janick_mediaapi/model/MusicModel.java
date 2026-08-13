@@ -8,19 +8,17 @@ import java.util.List;
 
 @Getter
 @Setter
-public class SeriesModel extends AbstractModel {
+public class MusicModel extends AbstractModel {
 
     private int id;
 
     private String name;
 
+    private String artist;
+
     private String description;
 
-    private String yearStart;
-
-    private String yearEnd;
-
-    private int episodeLength;
+    private String year;
 
     private String posterFilepath;
 
