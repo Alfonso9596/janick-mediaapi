@@ -6,6 +6,7 @@ import com.janick_mediadb.janick_mediaapi.entity.security.RoleEntity;
 import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
 import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
 import com.janick_mediadb.janick_mediaapi.exception.NotFoundException;
+import com.janick_mediadb.janick_mediaapi.input.admin.PasswordChangeInput;
 import com.janick_mediadb.janick_mediaapi.input.admin.UserInput;
 import com.janick_mediadb.janick_mediaapi.repository.RoleRepository;
 import com.janick_mediadb.janick_mediaapi.repository.UserRepository;
@@ -115,6 +116,20 @@ public class AuthServiceImpl implements AuthService {
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
                 .body("You've been signed out");
+    }
+
+    @Override
+    public ResponseEntity<String> updatePassword(UserDetailsImpl principal, PasswordChangeInput passwordChangeInput) {
+        UsersEntity user = userRepository.findByUsername(principal.getUsername()).orElseThrow(() -> new NotFoundException("Username not found!"));
+        if (!passwordEncoder.matches(passwordChangeInput.getCurrentPassword(), user.getPassword())) {
+            throw new BadRequestException("Current password does not match old password!");
+        }
+
+        user.setPassword(passwordEncoder.encode(passwordChangeInput.getNewPassword()));
+        userRepository.save(user);
+
+        return ResponseEntity.ok()
+                .body("Password changed successfully");
     }
 
     @Override

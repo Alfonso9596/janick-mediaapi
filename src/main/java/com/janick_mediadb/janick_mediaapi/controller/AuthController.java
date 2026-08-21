@@ -1,6 +1,7 @@
 package com.janick_mediadb.janick_mediaapi.controller;
 
 import com.janick_mediadb.janick_mediaapi.auth.*;
+import com.janick_mediadb.janick_mediaapi.input.admin.PasswordChangeInput;
 import com.janick_mediadb.janick_mediaapi.input.admin.UserInput;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,12 @@ public class AuthController {
     public ResponseEntity<String> logout() {
         UserDetailsImpl principal = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return authService.logout(principal);
+    }
+
+    @PutMapping("/changepassword")
+    public ResponseEntity<String> changePassword(@RequestBody PasswordChangeInput passwordChangeInput) {
+        UserDetailsImpl principal = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return authService.updatePassword(principal, passwordChangeInput);
     }
 
     @PostMapping("/refreshtoken")
