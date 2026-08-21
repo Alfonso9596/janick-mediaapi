@@ -23,6 +23,7 @@ import com.janick_mediadb.janick_mediaapi.utils.NamingUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,10 +39,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service
 public class SeriesService implements MediaService {
+
+    @Value("${server.timezone}")
+    private String timezone;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeriesService.class);
     private static final String SERIES_FILES_PATH = "series/";
@@ -77,7 +83,7 @@ public class SeriesService implements MediaService {
 
         List<SeriesEntity> listOfSeries = series.getContent();
         List<SeriesModel> content = listOfSeries.stream().map(s -> {
-            SeriesModel model = s.toModel();
+            SeriesModel model = s.toModel(timezone);
             seriesGenreXrefService.collectGenres(s.getId(), model);
             seriesRatingXrefService.collectRatings(s.getId(), model);
             return model;
@@ -104,7 +110,7 @@ public class SeriesService implements MediaService {
         Optional<SeriesEntity> opSeries = seriesRepository.findById(id);
         if (opSeries.isPresent()) {
             LOGGER.info("getSeriesById: Found series with id {}", id);
-            SeriesModel model = opSeries.get().toModel();
+            SeriesModel model = opSeries.get().toModel(timezone);
             seriesGenreXrefService.collectGenres(model.getId(), model);
             seriesRatingXrefService.collectRatings(model.getId(), model);
             return model;
@@ -158,16 +164,16 @@ public class SeriesService implements MediaService {
         String posterFilename = SERIES_FILES_PATH + filename + "/" + filename + FileStorageServiceImpl.POSTER_FILE_TYPE;
         seriesEntity.setPosterFilepath(posterFilename);
 
-        Instant currentTime = Instant.now();
+        Instant currentTime = ZonedDateTime.now(ZoneId.of(timezone)).toInstant();
 
         seriesEntity.setCreatedAt(currentTime);
         seriesEntity.setLastUpdated(currentTime);
 
         seriesEntity = seriesRepository.save(seriesEntity);
-        LOGGER.info("saveSeries: Saving series {}", seriesEntity.toModel());
+        LOGGER.info("saveSeries: Saving series {}", seriesEntity.toModel(timezone));
         seriesGenreXrefService.saveSeriesGenreXref(seriesEntity, genreEntities);
 
-        return seriesEntity.toModel();
+        return seriesEntity.toModel(timezone);
     }
 
     public SeriesModel updateSeries(int id, SeriesInput seriesInput) {
@@ -200,13 +206,13 @@ public class SeriesService implements MediaService {
         seriesGenreXrefService.deleteSeriesGenreReferenceBySeriesId(id);
         mapToEntity(seriesEntity, seriesInput);
 
-        Instant currentTime = Instant.now();
+        Instant currentTime = ZonedDateTime.now(ZoneId.of(timezone)).toInstant();
         seriesEntity.setLastUpdated(currentTime);
         seriesEntity = seriesRepository.save(seriesEntity);
-        LOGGER.info("updateSeries: Updating series {}", seriesEntity.toModel());
+        LOGGER.info("updateSeries: Updating series {}", seriesEntity.toModel(timezone));
         seriesGenreXrefService.saveSeriesGenreXref(seriesEntity, genreEntities);
 
-        return seriesEntity.toModel();
+        return seriesEntity.toModel(timezone);
     }
 
     private void mapToEntity(SeriesEntity existingSeries, SeriesInput seriesInput) {
@@ -240,7 +246,7 @@ public class SeriesService implements MediaService {
         seriesGenreXrefService.deleteSeriesGenreReferenceBySeriesId(id);
         seriesRatingXrefService.deleteSeriesRatingReferenceBySeriesId(id);
 
-        LOGGER.info("deleteSeries: Deleting series {}", seriesEntity.toModel());
+        LOGGER.info("deleteSeries: Deleting series {}", seriesEntity.toModel(timezone));
         seriesRepository.delete(seriesEntity);
         return ResponseEntity
                 .status(HttpStatus.OK)

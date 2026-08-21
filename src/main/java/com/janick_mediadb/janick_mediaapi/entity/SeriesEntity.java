@@ -52,7 +52,7 @@ public class SeriesEntity extends AbstractEntity {
         this.episodeLength = seriesInput.getEpisodeLength();
     }
 
-    public SeriesModel toModel() {
+    public SeriesModel toModel(String timezone) {
         SeriesModel model = new SeriesModel();
         model.setId(id);
         model.setName(name);
@@ -61,8 +61,8 @@ public class SeriesEntity extends AbstractEntity {
         model.setYearEnd(yearEnd);
         model.setEpisodeLength(episodeLength);
         model.setPosterFilepath(posterFilepath);
-        model.setCreatedAt(createdAt.atZone(ZoneId.of("Europe/Zurich")));
-        model.setLastUpdated(lastUpdated.atZone(ZoneId.of("Europe/Zurich")));
+        model.setCreatedAt(createdAt.atZone(ZoneId.of(timezone)));
+        model.setLastUpdated(lastUpdated.atZone(ZoneId.of(timezone)));
         model.setUser(user.toModel());
         return model;
     }

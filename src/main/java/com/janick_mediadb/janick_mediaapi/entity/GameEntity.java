@@ -51,15 +51,15 @@ public class GameEntity extends AbstractEntity {
         this.year = gameInput.getYear();
     }
 
-    public GameModel toModel() {
+    public GameModel toModel(String timezone) {
         GameModel model = new GameModel();
         model.setId(id);
         model.setName(name);
         model.setDescription(description);
         model.setYear(year);
         model.setPosterFilepath(posterFilepath);
-        model.setCreatedAt(createdAt.atZone(ZoneId.of("Europe/Zurich")));
-        model.setLastUpdated(lastUpdated.atZone(ZoneId.of("Europe/Zurich")));
+        model.setCreatedAt(createdAt.atZone(ZoneId.of(timezone)));
+        model.setLastUpdated(lastUpdated.atZone(ZoneId.of(timezone)));
         model.setUser(user.toModel());
         return model;
     }

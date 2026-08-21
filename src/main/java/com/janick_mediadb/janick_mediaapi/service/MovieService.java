@@ -23,6 +23,7 @@ import com.janick_mediadb.janick_mediaapi.utils.NamingUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,10 +39,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service
 public class MovieService implements MediaService {
+
+    @Value("${server.timezone}")
+    private String timezone;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MovieService.class);
     private static final String MOVIE_FILES_PATH = "movies/";
@@ -77,7 +83,7 @@ public class MovieService implements MediaService {
 
         List<MovieEntity> listOfMovies = movies.getContent();
         List<MovieModel> content = listOfMovies.stream().map(m -> {
-            MovieModel model = m.toModel();
+            MovieModel model = m.toModel(timezone);
             movieGenreXrefService.collectGenres(m.getId(), model);
             movieRatingXrefService.collectRatings(m.getId(), model);
             return model;
@@ -104,7 +110,7 @@ public class MovieService implements MediaService {
         Optional<MovieEntity> opMovie = movieRepository.findById(id);
         if (opMovie.isPresent()) {
             LOGGER.info("getMovieById: Found movie with id {}", id);
-            MovieModel model = opMovie.get().toModel();
+            MovieModel model = opMovie.get().toModel(timezone);
             movieGenreXrefService.collectGenres(model.getId(), model);
             movieRatingXrefService.collectRatings(model.getId(), model);
             return model;
@@ -158,16 +164,16 @@ public class MovieService implements MediaService {
         String posterFilename = MOVIE_FILES_PATH + filename + "/" + filename + FileStorageServiceImpl.POSTER_FILE_TYPE;
         movieEntity.setPosterFilepath(posterFilename);
 
-        Instant currentTime = Instant.now();
+        Instant currentTime = ZonedDateTime.now(ZoneId.of(timezone)).toInstant();
 
         movieEntity.setCreatedAt(currentTime);
         movieEntity.setLastUpdated(currentTime);
 
         movieEntity = movieRepository.save(movieEntity);
-        LOGGER.info("saveMovie: Saving movie {}", movieEntity.toModel());
+        LOGGER.info("saveMovie: Saving movie {}", movieEntity.toModel(timezone));
         movieGenreXrefService.saveMovieGenreXref(movieEntity, genreEntities);
 
-        return movieEntity.toModel();
+        return movieEntity.toModel(timezone);
     }
 
     public MovieModel updateMovie(int id, MovieInput movieInput) {
@@ -200,13 +206,13 @@ public class MovieService implements MediaService {
         movieGenreXrefService.deleteMovieGenreReferenceByMovieId(id);
         mapToEntity(movieEntity, movieInput);
 
-        Instant currentTime = Instant.now();
+        Instant currentTime = ZonedDateTime.now(ZoneId.of(timezone)).toInstant();
         movieEntity.setLastUpdated(currentTime);
         movieEntity = movieRepository.save(movieEntity);
-        LOGGER.info("updateMovie: Updating movie {}", movieEntity.toModel());
+        LOGGER.info("updateMovie: Updating movie {}", movieEntity.toModel(timezone));
         movieGenreXrefService.saveMovieGenreXref(movieEntity, genreEntities);
 
-        return movieEntity.toModel();
+        return movieEntity.toModel(timezone);
     }
 
     private void mapToEntity(MovieEntity existingMovie, MovieInput movieInput) {
@@ -240,7 +246,7 @@ public class MovieService implements MediaService {
         movieGenreXrefService.deleteMovieGenreReferenceByMovieId(id);
         movieRatingXrefService.deleteMovieRatingReferenceByMovieId(id);
 
-        LOGGER.info("deleteMovie: Deleting movie {}", movieEntity.toModel());
+        LOGGER.info("deleteMovie: Deleting movie {}", movieEntity.toModel(timezone));
         movieRepository.delete(movieEntity);
         return ResponseEntity
                 .status(HttpStatus.OK)

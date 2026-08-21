@@ -23,6 +23,7 @@ import com.janick_mediadb.janick_mediaapi.utils.NamingUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +48,9 @@ import java.util.Optional;
 
 @Service
 public class MusicService implements MediaService {
+
+    @Value("${server.timezone}")
+    private String timezone;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MusicService.class);
     private static final String MUSIC_FILES_PATH = "music/";
@@ -82,7 +86,7 @@ public class MusicService implements MediaService {
 
         List<MusicEntity> listOfMusic = music.getContent();
         List<MusicModel> content = listOfMusic.stream().map(m -> {
-            MusicModel model = m.toModel();
+            MusicModel model = m.toModel(timezone);
             musicGenreXrefService.collectGenres(m.getId(), model);
             musicRatingXrefService.collectRatings(m.getId(), model);
             return model;
@@ -103,7 +107,7 @@ public class MusicService implements MediaService {
         Optional<MusicEntity> opMusic = musicRepository.findById(id);
         if (opMusic.isPresent()) {
             LOGGER.info("getMusicById: Found music with id {}", id);
-            MusicModel model = opMusic.get().toModel();
+            MusicModel model = opMusic.get().toModel(timezone);
             musicGenreXrefService.collectGenres(model.getId(), model);
             musicRatingXrefService.collectRatings(model.getId(), model);
             return model;
@@ -158,16 +162,16 @@ public class MusicService implements MediaService {
         String posterFilename = MUSIC_FILES_PATH + filename + "/" + filename + FileStorageServiceImpl.POSTER_FILE_TYPE;
         musicEntity.setPosterFilepath(posterFilename);
 
-        Instant currentTime = ZonedDateTime.now(ZoneId.of("Europe/Zurich")).toInstant();
+        Instant currentTime = ZonedDateTime.now(ZoneId.of(timezone)).toInstant();
 
         musicEntity.setCreatedAt(currentTime);
         musicEntity.setLastUpdated(currentTime);
 
         musicEntity = musicRepository.save(musicEntity);
-        LOGGER.info("saveMusic: Saving music {}", musicEntity.toModel());
+        LOGGER.info("saveMusic: Saving music {}", musicEntity.toModel(timezone));
         musicGenreXrefService.saveMusicGenreXref(musicEntity, genreEntities);
 
-        return musicEntity.toModel();
+        return musicEntity.toModel(timezone);
     }
 
     public MusicModel updateMusic(int id, MusicInput musicInput) {
@@ -201,13 +205,13 @@ public class MusicService implements MediaService {
         musicGenreXrefService.deleteMusicGenreReferenceByMusicId(id);
         mapToEntity(musicEntity, musicInput);
 
-        Instant currentTime = ZonedDateTime.now(ZoneId.of("Europe/Zurich")).toInstant();
+        Instant currentTime = ZonedDateTime.now(ZoneId.of(timezone)).toInstant();
         musicEntity.setLastUpdated(currentTime);
         musicEntity = musicRepository.save(musicEntity);
-        LOGGER.info("updateMusic: Updating music {}", musicEntity.toModel());
+        LOGGER.info("updateMusic: Updating music {}", musicEntity.toModel(timezone));
         musicGenreXrefService.saveMusicGenreXref(musicEntity, genreEntities);
 
-        return musicEntity.toModel();
+        return musicEntity.toModel(timezone);
     }
 
     public ResponseEntity<String> deleteMusic(int id) {
@@ -226,7 +230,7 @@ public class MusicService implements MediaService {
         musicGenreXrefService.deleteMusicGenreReferenceByMusicId(id);
         musicRatingXrefService.deleteMusicRatingReferenceByMusicId(id);
 
-        LOGGER.info("deleteMusic: Deleting music {}", musicEntity.toModel());
+        LOGGER.info("deleteMusic: Deleting music {}", musicEntity.toModel(timezone));
         musicRepository.delete(musicEntity);
         return ResponseEntity
                 .status(HttpStatus.OK)

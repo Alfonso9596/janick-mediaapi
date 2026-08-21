@@ -25,6 +25,7 @@ import com.janick_mediadb.janick_mediaapi.utils.NamingUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,10 +41,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service
 public class GameService implements MediaService {
+
+    @Value("${server.timezone}")
+    private String timezone;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GameService.class);
     private static final String GAME_FILES_PATH = "games/";
@@ -85,7 +91,7 @@ public class GameService implements MediaService {
 
         List<GameEntity> listOfGames = games.getContent();
         List<GameModel> content = listOfGames.stream().map(g -> {
-            GameModel model = g.toModel();
+            GameModel model = g.toModel(timezone);
             gameGenreXrefService.collectGenres(g.getId(), model);
             gamePlatformXrefService.collectPlatforms(g.getId(), model);
             gameRatingXrefService.collectRatings(g.getId(), model);
@@ -113,7 +119,7 @@ public class GameService implements MediaService {
         Optional<GameEntity> opGame = gameRepository.findById(id);
         if (opGame.isPresent()) {
             LOGGER.info("getGameById: Found game with id {}", id);
-            GameModel model = opGame.get().toModel();
+            GameModel model = opGame.get().toModel(timezone);
             gameGenreXrefService.collectGenres(model.getId(), model);
             gamePlatformXrefService.collectPlatforms(model.getId(), model);
             gameRatingXrefService.collectRatings(model.getId(), model);
@@ -186,17 +192,17 @@ public class GameService implements MediaService {
         String posterFilename = GAME_FILES_PATH + filename + "/" + filename + FileStorageServiceImpl.POSTER_FILE_TYPE;
         gameEntity.setPosterFilepath(posterFilename);
 
-        Instant currentTime = Instant.now();
+        Instant currentTime = ZonedDateTime.now(ZoneId.of(timezone)).toInstant();
 
         gameEntity.setCreatedAt(currentTime);
         gameEntity.setLastUpdated(currentTime);
 
         gameEntity = gameRepository.save(gameEntity);
-        LOGGER.info("saveGame: Saving game {}", gameEntity.toModel());
+        LOGGER.info("saveGame: Saving game {}", gameEntity.toModel(timezone));
         gameGenreXrefService.saveGameGenreXref(gameEntity, genreEntities);
         gamePlatformXrefService.saveGamePlatformXref(gameEntity, platformEntities);
 
-        return gameEntity.toModel();
+        return gameEntity.toModel(timezone);
     }
 
     public GameModel updateGame(int id, GameInput gameInput) {
@@ -249,14 +255,14 @@ public class GameService implements MediaService {
         gamePlatformXrefService.deleteGamePlatformReferenceByGameId(id);
         mapToEntity(gameEntity, gameInput);
 
-        Instant currentTime = Instant.now();
+        Instant currentTime = ZonedDateTime.now(ZoneId.of(timezone)).toInstant();
         gameEntity.setLastUpdated(currentTime);
         gameEntity = gameRepository.save(gameEntity);
-        LOGGER.info("updateGame: Updating game {}", gameEntity.toModel());
+        LOGGER.info("updateGame: Updating game {}", gameEntity.toModel(timezone));
         gameGenreXrefService.saveGameGenreXref(gameEntity, genreEntities);
         gamePlatformXrefService.saveGamePlatformXref(gameEntity, platformEntities);
 
-        return gameEntity.toModel();
+        return gameEntity.toModel(timezone);
     }
 
     public ResponseEntity<String> deleteGame(int id) {
@@ -276,7 +282,7 @@ public class GameService implements MediaService {
         gameRatingXrefService.deleteGameRatingReferenceByGameId(id);
         gamePlatformXrefService.deleteGamePlatformReferenceByGameId(id);
 
-        LOGGER.info("deleteGame: Deleting game {}", gameEntity.toModel());
+        LOGGER.info("deleteGame: Deleting game {}", gameEntity.toModel(timezone));
         gameRepository.delete(gameEntity);
         return ResponseEntity
                 .status(HttpStatus.OK)

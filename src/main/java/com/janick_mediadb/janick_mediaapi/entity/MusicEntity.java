@@ -48,7 +48,7 @@ public class MusicEntity extends AbstractEntity {
         this.year = musicInput.getYear();
     }
 
-    public MusicModel toModel() {
+    public MusicModel toModel(String timezone) {
         MusicModel model = new MusicModel();
         model.setId(id);
         model.setName(name);
@@ -56,8 +56,8 @@ public class MusicEntity extends AbstractEntity {
         model.setDescription(description);
         model.setYear(year);
         model.setPosterFilepath(posterFilepath);
-        model.setCreatedAt(createdAt.atZone(ZoneId.of("Europe/Zurich")));
-        model.setLastUpdated(lastUpdated.atZone(ZoneId.of("Europe/Zurich")));
+        model.setCreatedAt(createdAt.atZone(ZoneId.of(timezone)));
+        model.setLastUpdated(lastUpdated.atZone(ZoneId.of(timezone)));
         model.setUser(user.toModel());
         return model;
     }

@@ -18,6 +18,7 @@ import com.janick_mediadb.janick_mediaapi.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class AdminService {
+
+    @Value("${server.timezone}")
+    private String timezone;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminService.class);
 
@@ -157,7 +161,7 @@ public class AdminService {
     public MovieResponse getMoviesData() {
         List<MovieEntity> movies =  movieRepository.findAll();
         List<MovieModel> content = movies.stream().map(m -> {
-            MovieModel model = m.toModel();
+            MovieModel model = m.toModel(timezone);
             movieGenreXrefService.collectGenres(m.getId(), model);
             movieRatingXrefService.collectRatings(m.getId(), model);
             return model;
@@ -173,7 +177,7 @@ public class AdminService {
     public SeriesResponse getSeriesData() {
         List<SeriesEntity> series =  seriesRepository.findAll();
         List<SeriesModel> content = series.stream().map(s -> {
-            SeriesModel model = s.toModel();
+            SeriesModel model = s.toModel(timezone);
             seriesGenreXrefService.collectGenres(s.getId(), model);
             seriesRatingXrefService.collectRatings(s.getId(), model);
             return model;
@@ -189,7 +193,7 @@ public class AdminService {
     public GameResponse getGamesData() {
         List<GameEntity> games = gameRepository.findAll();
         List<GameModel> content = games.stream().map(g -> {
-            GameModel model = g.toModel();
+            GameModel model = g.toModel(timezone);
             gameGenreXrefService.collectGenres(g.getId(), model);
             gameRatingXrefService.collectRatings(g.getId(), model);
             return model;
@@ -205,7 +209,7 @@ public class AdminService {
     public MusicResponse getMusicData() {
         List<MusicEntity> music = musicRepository.findAll();
         List<MusicModel> content = music.stream().map(m -> {
-            MusicModel model = m.toModel();
+            MusicModel model = m.toModel(timezone);
             musicGenreXrefService.collectGenres(m.getId(), model);
             musicRatingXrefService.collectRatings(m.getId(), model);
             return model;

@@ -50,7 +50,7 @@ public class MovieEntity extends AbstractEntity {
         this.length = movieInput.getLength();
     }
 
-    public MovieModel toModel() {
+    public MovieModel toModel(String timezone) {
         MovieModel model = new MovieModel();
         model.setId(id);
         model.setName(name);
@@ -58,8 +58,8 @@ public class MovieEntity extends AbstractEntity {
         model.setYear(year);
         model.setLength(length);
         model.setPosterFilepath(posterFilepath);
-        model.setCreatedAt(createdAt.atZone(ZoneId.of("Europe/Zurich")));
-        model.setLastUpdated(lastUpdated.atZone(ZoneId.of("Europe/Zurich")));
+        model.setCreatedAt(createdAt.atZone(ZoneId.of(timezone)));
+        model.setLastUpdated(lastUpdated.atZone(ZoneId.of(timezone)));
         model.setUser(user.toModel());
         return model;
     }

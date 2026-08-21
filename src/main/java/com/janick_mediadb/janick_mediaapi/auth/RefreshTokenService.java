@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 @Service
@@ -17,6 +19,9 @@ public class RefreshTokenService {
 
     @Value("${app.jwt.refresh-expiration-milliseconds}")
     private int jwtRefreshExpirationMs;
+
+    @Value("${server.timezone}")
+    private String timezone;
 
     private final RefreshTokenRepository refreshTokenRepository;
 
@@ -34,9 +39,10 @@ public class RefreshTokenService {
 
     public RefreshTokenEntity createRefreshToken(int userId, String token) {
         RefreshTokenEntity refreshToken = new RefreshTokenEntity();
+        Instant currentTime = ZonedDateTime.now(ZoneId.of(timezone)).toInstant();
 
         refreshToken.setUser(userRepository.findById(userId).get());
-        refreshToken.setExpiryDate(Instant.now().plusMillis(jwtRefreshExpirationMs));
+        refreshToken.setExpiryDate(currentTime.plusMillis(jwtRefreshExpirationMs));
         refreshToken.setToken(token);
 
         refreshToken = refreshTokenRepository.save(refreshToken);
@@ -44,7 +50,8 @@ public class RefreshTokenService {
     }
 
     public RefreshTokenEntity verifyExpiration(RefreshTokenEntity token) {
-        if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
+        Instant currentTime = ZonedDateTime.now(ZoneId.of(timezone)).toInstant();
+        if (token.getExpiryDate().compareTo(currentTime) < 0) {
             refreshTokenRepository.delete(token);
             throw new BadRequestException("Refresh token has expired. Please login again");
         }
