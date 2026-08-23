@@ -39,7 +39,6 @@ public class MovieEntity extends AbstractEntity {
     @JoinColumn(name = "USER_ID")
     private UsersEntity user;
 
-
     @OneToMany(mappedBy = "movie")
     private Set<MovieGenreXrefEntity> movieGenreXrefs = new HashSet<>();
 

@@ -7,13 +7,17 @@ public class NamingUtility {
     }
 
     public static String renameTitleForFilepath(String title, String year) {
-        String cleanTitle = title.toLowerCase().replace(":", "").replace(" - ", "_").replace("-", " ").replace(" ", "_");
+        String cleanTitle = returnCleanFilepathValue(title);
         return cleanTitle + "_" + year;
     }
 
     public static String renameTitleForMusicFilepath(String title, String artist, String year) {
-        String cleanTitle = title.toLowerCase().replace(":", "").replace(" - ", "_").replace("-", " ").replace(" ", "_");
-        String cleanArtist = artist.toLowerCase().replace(":", "").replace(" - ", "_").replace("-", " ").replace(" ", "_");
+        String cleanTitle = returnCleanFilepathValue(title);
+        String cleanArtist = returnCleanFilepathValue(artist);
         return cleanTitle + "_" + cleanArtist + "_" + year;
+    }
+
+    public static String returnCleanFilepathValue(String value) {
+        return value.toLowerCase().replace(":", "").replace(" - ", "_").replace("-", " ").replace(" ", "_");
     }
 }

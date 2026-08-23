@@ -4,5 +4,6 @@ public enum UploadMediaType {
     MOVIE,
     SERIES,
     GAME,
-    MUSIC
+    MUSIC,
+    RECIPE
 }

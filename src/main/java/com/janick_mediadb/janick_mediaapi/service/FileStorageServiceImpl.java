@@ -34,6 +34,8 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     private final MusicService musicService;
 
+    private final RecipeService recipeService;
+
     public static final String POSTER_FILE_TYPE = ".jpg";
 
     // TODO: Move resource paths to application context
@@ -42,13 +44,15 @@ public class FileStorageServiceImpl implements FileStorageService {
     public static final Path series = Paths.get("uploads/series");
     public static final Path games = Paths.get("uploads/games");
     public static final Path music = Paths.get("uploads/music");
+    public static final Path recipes = Paths.get("uploads/recipes");
 
     @Autowired
-    public FileStorageServiceImpl(MovieService movieService, SeriesService seriesService, GameService gameService, MusicService musicService) {
+    public FileStorageServiceImpl(MovieService movieService, SeriesService seriesService, GameService gameService, MusicService musicService, RecipeService recipeService) {
         this.movieService = movieService;
         this.seriesService = seriesService;
         this.gameService = gameService;
         this.musicService = musicService;
+        this.recipeService = recipeService;
     }
 
     @Override
@@ -59,6 +63,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             Files.createDirectories(series);
             Files.createDirectories(games);
             Files.createDirectories(music);
+            Files.createDirectories(recipes);
         } catch (IOException _) {
             throw new InternalServerException("Could not initialize folder for upload!");
         }
@@ -68,6 +73,8 @@ public class FileStorageServiceImpl implements FileStorageService {
     public void uploadPoster(MultipartFile file, String title, String artist, String year, UploadMediaType mediaType) {
         if (mediaType.equals(UploadMediaType.MUSIC)) {
             title = NamingUtility.renameTitleForMusicFilepath(title, artist, year);
+        } else if (mediaType.equals(UploadMediaType.RECIPE)) {
+            title = NamingUtility.returnCleanFilepathValue(title);
         } else {
             title = NamingUtility.renameTitleForFilepath(title, year);
         }
@@ -136,6 +143,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             case MOVIE -> this.movies.resolve(filename);
             case SERIES -> this.series.resolve(filename);
             case MUSIC -> this.music.resolve(filename);
+            case RECIPE -> this.recipes.resolve(filename);
         };
     }
 
@@ -152,6 +160,9 @@ public class FileStorageServiceImpl implements FileStorageService {
             }
             case MUSIC -> {
                 return musicService;
+            }
+            case RECIPE -> {
+                return recipeService;
             }
         }
         return null;

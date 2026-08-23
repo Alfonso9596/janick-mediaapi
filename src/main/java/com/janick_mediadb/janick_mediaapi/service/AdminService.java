@@ -2,10 +2,7 @@ package com.janick_mediadb.janick_mediaapi.service;
 
 import com.janick_mediadb.janick_mediaapi.auth.RefreshTokenService;
 import com.janick_mediadb.janick_mediaapi.auth.UserDetailsImpl;
-import com.janick_mediadb.janick_mediaapi.entity.GameEntity;
-import com.janick_mediadb.janick_mediaapi.entity.MovieEntity;
-import com.janick_mediadb.janick_mediaapi.entity.MusicEntity;
-import com.janick_mediadb.janick_mediaapi.entity.SeriesEntity;
+import com.janick_mediadb.janick_mediaapi.entity.*;
 import com.janick_mediadb.janick_mediaapi.entity.security.RoleEntity;
 import com.janick_mediadb.janick_mediaapi.entity.security.UsersEntity;
 import com.janick_mediadb.janick_mediaapi.exception.BadRequestException;
@@ -50,6 +47,8 @@ public class AdminService {
 
     private final MusicRepository musicRepository;
 
+    private final RecipeRepository recipeRepository;
+
     private final UserRepository userRepository;
 
     private final RoleRepository roleRepository;
@@ -70,16 +69,21 @@ public class AdminService {
 
     private final MusicRatingXrefService musicRatingXrefService;
 
+    private final RecipeMealTypeXrefService recipeMealTypeXrefService;
+
+    private final RecipeRatingXrefService recipeRatingXrefService;
+
     private final RefreshTokenService refreshTokenService;
 
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AdminService(MovieRepository movieRepository, SeriesRepository seriesRepository, GameRepository gameRepository, MusicRepository musicRepository, UserRepository userRepository, RoleRepository roleRepository, MovieGenreXrefService movieGenreXrefService, MovieRatingXrefService movieRatingXrefService, SeriesGenreXrefService seriesGenreXrefService, SeriesRatingXrefService seriesRatingXrefService, GameGenreXrefService gameGenreXrefService, GameRatingXrefService gameRatingXrefService, MusicGenreXrefService musicGenreXrefService, MusicRatingXrefService musicRatingXrefService, RefreshTokenService refreshTokenService, PasswordEncoder passwordEncoder) {
+    public AdminService(MovieRepository movieRepository, SeriesRepository seriesRepository, GameRepository gameRepository, MusicRepository musicRepository, RecipeRepository recipeRepository, UserRepository userRepository, RoleRepository roleRepository, MovieGenreXrefService movieGenreXrefService, MovieRatingXrefService movieRatingXrefService, SeriesGenreXrefService seriesGenreXrefService, SeriesRatingXrefService seriesRatingXrefService, GameGenreXrefService gameGenreXrefService, GameRatingXrefService gameRatingXrefService, MusicGenreXrefService musicGenreXrefService, MusicRatingXrefService musicRatingXrefService, RecipeMealTypeXrefService recipeMealTypeXrefService, RecipeRatingXrefService recipeRatingXrefService, RefreshTokenService refreshTokenService, PasswordEncoder passwordEncoder) {
         this.movieRepository = movieRepository;
         this.seriesRepository = seriesRepository;
         this.gameRepository = gameRepository;
         this.musicRepository = musicRepository;
+        this.recipeRepository = recipeRepository;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.movieGenreXrefService = movieGenreXrefService;
@@ -90,6 +94,8 @@ public class AdminService {
         this.gameRatingXrefService = gameRatingXrefService;
         this.musicGenreXrefService = musicGenreXrefService;
         this.musicRatingXrefService = musicRatingXrefService;
+        this.recipeMealTypeXrefService = recipeMealTypeXrefService;
+        this.recipeRatingXrefService = recipeRatingXrefService;
         this.refreshTokenService = refreshTokenService;
         this.passwordEncoder = passwordEncoder;
     }
@@ -220,6 +226,22 @@ public class AdminService {
         musicResponse.setTotalElements(music.size());
 
         return musicResponse;
+    }
+
+    public RecipeResponse getRecipesData() {
+        List<RecipeEntity> recipes = recipeRepository.findAll();
+        List<RecipeModel> content = recipes.stream().map(r -> {
+            RecipeModel model = r.toModel(timezone);
+            recipeMealTypeXrefService.collectMealTypes(r.getId(), model);
+            recipeRatingXrefService.collectRatings(r.getId(), model);
+            return model;
+        }).toList();
+
+        RecipeResponse recipeResponse = new RecipeResponse();
+        recipeResponse.setContent(content);
+        recipeResponse.setTotalElements(recipes.size());
+
+        return recipeResponse;
     }
 
     public List<RoleModel> getAllRoles() {

@@ -36,7 +36,7 @@ public class FileController {
     public ResponseEntity<String> uploadPoster(
             @RequestPart("filename") String title,
             @RequestPart(name = "artist", required = false) String artist,
-            @RequestPart("year") String year,
+            @RequestPart(name = "year", required = false) String year,
             @RequestParam("mediaType") UploadMediaType mediaType,
             @RequestPart("file") MultipartFile file) {
         try {

@@ -43,6 +43,9 @@ public class FileUtility {
                 case "zip", "rar", "7z", "tar":
                     fileInfoModel.setFileType(DownloadFileType.ZIP);
                     break;
+                case "txt":
+                    fileInfoModel.setFileType(DownloadFileType.TEXT);
+                    break;
                 // TODO: Add extensions for specific game files if needed in future
                 default:
                     fileInfoModel.setFileType(DownloadFileType.VIDEO);

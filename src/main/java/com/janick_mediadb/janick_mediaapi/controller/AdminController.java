@@ -50,6 +50,11 @@ public class AdminController {
         return adminService.getMusicData();
     }
 
+    @GetMapping("/recipes")
+    public RecipeResponse getRecipesData() {
+        return adminService.getRecipesData();
+    }
+
     @GetMapping("/users")
     public UserResponse getPageableUsers(
             @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE, required = false) int page,
