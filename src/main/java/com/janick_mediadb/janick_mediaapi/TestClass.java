@@ -14,9 +14,9 @@ public class TestClass {
 
     private static final Path root = Paths.get("uploads");
 
-    private static PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         testNamingUtility("Avatar - Der Herr der Elemente", "2010");
     }
 

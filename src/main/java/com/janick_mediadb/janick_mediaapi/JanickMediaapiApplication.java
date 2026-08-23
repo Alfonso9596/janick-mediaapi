@@ -19,7 +19,7 @@ public class JanickMediaapiApplication {
         return new ModelMapper();
     }
 
-	public static void main(String[] args) {
+	static void main(String[] args) {
 		SpringApplication.run(JanickMediaapiApplication.class, args);
 	}
 

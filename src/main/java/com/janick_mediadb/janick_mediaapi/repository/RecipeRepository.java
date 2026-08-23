@@ -10,5 +10,5 @@ import java.util.List;
 public interface RecipeRepository extends JpaRepository<RecipeEntity, Integer>, JpaSpecificationExecutor<RecipeEntity> {
 
     @Query("SELECT r.name FROM RecipeEntity r")
-    public List<String> getAllRecipeNames();
+    List<String> getAllRecipeNames();
 }

@@ -29,7 +29,7 @@ public class MusicRatingXrefService {
         List<MusicRatingXrefEntity> ratings = musicRatingXrefRepository.findAllByMusicId(musicId);
         if (!ratings.isEmpty()) {
             model.setRatingAmount(ratings.size());
-            double result = (double) (ratings.stream().mapToInt(MusicRatingXrefEntity::getRating).sum() / ratings.size());
+            double result = (double) ratings.stream().mapToInt(MusicRatingXrefEntity::getRating).sum() / ratings.size();
             model.setRatingValue(result);
         } else {
             model.setRatingAmount(0);

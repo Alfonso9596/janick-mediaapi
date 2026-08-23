@@ -10,5 +10,5 @@ import java.util.List;
 public interface MovieRepository extends JpaRepository<MovieEntity, Integer>, JpaSpecificationExecutor<MovieEntity> {
 
     @Query("SELECT m.name FROM MovieEntity m")
-    public List<String> getAllMovieNames();
+    List<String> getAllMovieNames();
 }

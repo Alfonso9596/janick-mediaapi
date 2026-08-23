@@ -139,11 +139,11 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     private Path createPathFromType(UploadMediaType mediaType, String filename) {
         return switch (mediaType) {
-            case GAME -> this.games.resolve(filename);
-            case MOVIE -> this.movies.resolve(filename);
-            case SERIES -> this.series.resolve(filename);
-            case MUSIC -> this.music.resolve(filename);
-            case RECIPE -> this.recipes.resolve(filename);
+            case GAME -> games.resolve(filename);
+            case MOVIE -> movies.resolve(filename);
+            case SERIES -> series.resolve(filename);
+            case MUSIC -> music.resolve(filename);
+            case RECIPE -> recipes.resolve(filename);
         };
     }
 

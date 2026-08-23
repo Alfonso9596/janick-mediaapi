@@ -10,5 +10,5 @@ import java.util.List;
 public interface SeriesRepository extends JpaRepository<SeriesEntity, Integer>, JpaSpecificationExecutor<SeriesEntity> {
 
     @Query("SELECT s.name FROM SeriesEntity s")
-    public List<String> getAllSeriesNames();
+    List<String> getAllSeriesNames();
 }
