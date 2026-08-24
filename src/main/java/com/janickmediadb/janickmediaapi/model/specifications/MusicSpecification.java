@@ -32,7 +32,7 @@ public class MusicSpecification {
         return (root, query, criteriaBuilder) -> {
             Join<MusicEntity, MusicGenreXrefEntity> musicGenreXrefJoin = root.join("musicGenreXrefs", JoinType.INNER);
             Join<MusicGenreXrefEntity, MusicGenreEntity> musicGenreJoin = musicGenreXrefJoin.join("genre", JoinType.INNER);
-            return criteriaBuilder.like(musicGenreJoin.get("name"), "%" + genre + "%");
+            return criteriaBuilder.like(musicGenreJoin.get("name"), genre);
         };
     }
 }

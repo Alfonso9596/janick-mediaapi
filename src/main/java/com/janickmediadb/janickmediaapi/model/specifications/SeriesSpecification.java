@@ -22,7 +22,7 @@ public class SeriesSpecification {
         return (root, query, criteriaBuilder) -> {
             Join<SeriesEntity, SeriesGenreXrefEntity> seriesGenreXrefJoin = root.join("seriesGenreXrefs", JoinType.INNER);
             Join<SeriesGenreXrefEntity, MovieGenreEntity> movieGenreJoin = seriesGenreXrefJoin.join("genre", JoinType.INNER);
-            return criteriaBuilder.like(movieGenreJoin.get("name"), "%" + genre + "%");
+            return criteriaBuilder.like(movieGenreJoin.get("name"), genre);
         };
     }
 }

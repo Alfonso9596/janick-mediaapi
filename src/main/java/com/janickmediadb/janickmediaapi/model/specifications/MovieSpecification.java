@@ -27,7 +27,7 @@ public class MovieSpecification {
         return (root, query, criteriaBuilder) -> {
             Join<MovieEntity, MovieGenreXrefEntity> movieGenreXrefJoin = root.join("movieGenreXrefs", JoinType.INNER);
             Join<MovieGenreXrefEntity, MovieGenreEntity> movieGenreJoin = movieGenreXrefJoin.join("genre", JoinType.LEFT);
-            return criteriaBuilder.like(movieGenreJoin.get("name"), "%" + genre + "%");
+            return criteriaBuilder.like(movieGenreJoin.get("name"), genre);
         };
     }
 }

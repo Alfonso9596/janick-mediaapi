@@ -20,7 +20,7 @@ public class UserSpecification {
     public static Specification<UsersEntity> containsRole(String role) {
         return (root, query, criteriaBuilder) -> {
             Join<UsersEntity, RoleEntity> usersRoleJoin = root.join("users_roles_xref", JoinType.LEFT).join("ROLE_ID", JoinType.LEFT);
-            return criteriaBuilder.like(usersRoleJoin.get("name"), "%" + role + "%");
+            return criteriaBuilder.like(usersRoleJoin.get("name"), role);
         };
     }
 }

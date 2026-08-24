@@ -29,7 +29,7 @@ public class GameSpecification {
         return (root, query, criteriaBuilder) -> {
             Join<GameEntity, GameGenreXrefEntity> gameGenreXrefJoin = root.join("gameGenreXrefs", JoinType.INNER);
             Join<GameGenreXrefEntity, GameGenreEntity> gameGenreJoin = gameGenreXrefJoin.join("genre", JoinType.INNER);
-            return criteriaBuilder.like(gameGenreJoin.get("name"), "%" + genre + "%");
+            return criteriaBuilder.like(gameGenreJoin.get("name"), genre);
         };
     }
 
@@ -37,7 +37,7 @@ public class GameSpecification {
         return (root, query, criteriaBuilder) -> {
             Join<GameEntity, GamePlatformXrefEntity> gamePlatformXrefJoin = root.join("gamePlatformXrefs", JoinType.INNER);
             Join<GamePlatformXrefEntity, GamePlatformEntity> gamePlatformJoin = gamePlatformXrefJoin.join("platform", JoinType.INNER);
-            return criteriaBuilder.like(gamePlatformJoin.get("name"), "%" + platform + "%");
+            return criteriaBuilder.like(gamePlatformJoin.get("name"), platform);
         };
     }
 }

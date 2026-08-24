@@ -22,7 +22,7 @@ public class RecipeSpecification {
         return (root, query, criteriaBuilder) -> {
             Join<RecipeEntity, RecipeMealTypeXrefEntity> recipeMealTypeXrefJoin = root.join("recipeMealTypeXrefs", JoinType.INNER);
             Join<RecipeMealTypeXrefEntity, MealTypeEntity> mealTypeJoin = recipeMealTypeXrefJoin.join("mealType", JoinType.LEFT);
-            return criteriaBuilder.like(mealTypeJoin.get("name"), "%" + mealType + "%");
+            return criteriaBuilder.like(mealTypeJoin.get("name"), mealType);
         };
     }
 
