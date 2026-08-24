@@ -1,8 +1,12 @@
 package com.janickmediadb.janickmediaapi.enums;
 
 public enum DownloadFileType {
+    UNKNOWN,
     FOLDER,
     ZIP,
     VIDEO,
-    TEXT
+    AUDIO,
+    TEXT,
+    PDF,
+    IMAGE
 }

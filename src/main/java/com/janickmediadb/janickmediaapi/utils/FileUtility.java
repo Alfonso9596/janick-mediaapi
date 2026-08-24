@@ -41,15 +41,16 @@ public class FileUtility {
 
             String fileExtension = getFileExtension(node.getName());
             switch (fileExtension) {
-                case "zip", "rar", "7z", "tar":
-                    fileInfoModel.setFileType(DownloadFileType.ZIP);
-                    break;
-                case "txt":
-                    fileInfoModel.setFileType(DownloadFileType.TEXT);
-                    break;
-                // TODO: Add extensions for specific game files if needed in future
-                default:
+                case "zip", "rar", "7z", "tar", "gz" -> fileInfoModel.setFileType(DownloadFileType.ZIP);
+                case "txt" -> fileInfoModel.setFileType(DownloadFileType.TEXT);
+                case "pdf" -> fileInfoModel.setFileType(DownloadFileType.PDF);
+                case "png", "jpg", "jpeg", "webp", "tiff", "bmp", "svg", "gif" ->
+                    fileInfoModel.setFileType(DownloadFileType.IMAGE);
+                case "mp4", "mov", "mkv", "avi", "webm", "wmv", "flv" ->
                     fileInfoModel.setFileType(DownloadFileType.VIDEO);
+                case "wav", "flac", "mp3", "wma", "aiff", "alac", "ape" ->
+                    fileInfoModel.setFileType(DownloadFileType.AUDIO);
+                case null, default -> fileInfoModel.setFileType(DownloadFileType.UNKNOWN);
             }
         }
         return fileInfoModel;
